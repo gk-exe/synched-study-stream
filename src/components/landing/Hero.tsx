@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "@tanstack/react-router";
 import heroOrb from "@/assets/hero-orb.jpg";
 
 export function Hero() {
@@ -52,11 +53,14 @@ export function Hero() {
           className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
         >
           <Button
+            asChild
             size="lg"
             className="bg-gradient-brand h-12 w-full rounded-full px-6 text-primary-foreground shadow-glow hover:opacity-90 sm:w-auto"
           >
-            Start studying free
-            <ArrowRight className="ml-1 h-4 w-4" />
+            <Link to="/signup">
+              Start studying free
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
           </Button>
           <Button
             size="lg"

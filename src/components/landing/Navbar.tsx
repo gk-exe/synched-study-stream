@@ -48,8 +48,20 @@ export function Navbar() {
           >
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
-          <Button size="sm" className="bg-gradient-brand rounded-full px-4 text-primary-foreground shadow-glow hover:opacity-90">
-            Get started
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="hidden rounded-full px-3 sm:inline-flex"
+          >
+            <Link to="/login">Sign in</Link>
+          </Button>
+          <Button
+            asChild
+            size="sm"
+            className="bg-gradient-brand rounded-full px-4 text-primary-foreground shadow-glow hover:opacity-90"
+          >
+            <Link to="/signup">Get started</Link>
           </Button>
         </div>
       </nav>
