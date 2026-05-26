@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "@tanstack/react-router";
 
 export function CTA() {
   return (
@@ -26,11 +27,14 @@ export function CTA() {
           Join thousands of students learning smarter with StudySync AI. Free forever, no credit card.
         </p>
         <Button
+          asChild
           size="lg"
           className="bg-gradient-brand mt-8 h-12 rounded-full px-7 text-primary-foreground shadow-glow hover:opacity-90"
         >
-          Start studying free
-          <ArrowRight className="ml-1 h-4 w-4" />
+          <Link to="/signup">
+            Start studying free
+            <ArrowRight className="ml-1 h-4 w-4" />
+          </Link>
         </Button>
       </motion.div>
     </section>
