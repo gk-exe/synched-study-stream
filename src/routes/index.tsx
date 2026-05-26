@@ -1,26 +1,40 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Navbar } from "@/components/landing/Navbar";
+import { Hero } from "@/components/landing/Hero";
+import { Features } from "@/components/landing/Features";
+import { CTA } from "@/components/landing/CTA";
+import { Footer } from "@/components/landing/Footer";
 
 export const Route = createFileRoute("/")({
   component: Index,
+  head: () => ({
+    meta: [
+      { title: "StudySync AI — Your intelligent study companion" },
+      {
+        name: "description",
+        content:
+          "StudySync AI turns your notes, lectures, and goals into a calm, focused study flow. Premium, minimal, AI-powered.",
+      },
+      { property: "og:title", content: "StudySync AI — Your intelligent study companion" },
+      {
+        property: "og:description",
+        content: "Calm, AI-powered study companion designed for the way Gen-Z learns.",
+      },
+    ],
+  }),
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
-
 function Index() {
-  return <PlaceholderIndex />;
+  return (
+    <ThemeProvider>
+      <main className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
+        <Navbar />
+        <Hero />
+        <Features />
+        <CTA />
+        <Footer />
+      </main>
+    </ThemeProvider>
+  );
 }
