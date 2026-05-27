@@ -33,7 +33,7 @@ function LoginInner() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) navigate({ to: "/onboarding" });
+    if (user) navigate({ to: "/dashboard" });
   }, [user, navigate]);
 
   const submit = async (e: React.FormEvent) => {
@@ -43,7 +43,7 @@ function LoginInner() {
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Welcome back");
-    navigate({ to: "/onboarding" });
+    navigate({ to: "/dashboard" });
   };
 
   return (
