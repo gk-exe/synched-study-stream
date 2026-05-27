@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_goals: {
+        Row: {
+          created_at: string
+          done: boolean
+          id: string
+          label: string
+          position: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          done?: boolean
+          id?: string
+          label: string
+          position?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          done?: boolean
+          id?: string
+          label?: string
+          position?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mood_logs: {
+        Row: {
+          created_at: string
+          id: string
+          mood: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mood: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mood?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -53,6 +104,69 @@ export type Database = {
           study_style?: string | null
           subjects?: string[] | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      study_sessions: {
+        Row: {
+          completed_at: string
+          created_at: string
+          duration_seconds: number
+          id: string
+          mode: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          created_at?: string
+          duration_seconds: number
+          id?: string
+          mode: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          mode?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_stats: {
+        Row: {
+          coins: number
+          completed_today: number
+          created_at: string
+          cycle_count: number
+          last_completed_date: string | null
+          streak: number
+          total_focus_sessions: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          coins?: number
+          completed_today?: number
+          created_at?: string
+          cycle_count?: number
+          last_completed_date?: string | null
+          streak?: number
+          total_focus_sessions?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          coins?: number
+          completed_today?: number
+          created_at?: string
+          cycle_count?: number
+          last_completed_date?: string | null
+          streak?: number
+          total_focus_sessions?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
