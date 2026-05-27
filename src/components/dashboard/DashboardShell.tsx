@@ -13,6 +13,8 @@ import {
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAppData } from "@/hooks/use-app-data";
+import { usePomodoro } from "@/hooks/use-pomodoro";
 
 const nav = [
   { label: "Overview", to: "/dashboard", icon: LayoutDashboard },
@@ -26,9 +28,24 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { theme, toggle } = useTheme();
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const isActive = (to: string) => pathname === to;
+  const { loading: dataLoading } = useAppData();
+  const { loading: statsLoading } = usePomodoro();
+  const syncing = dataLoading || statsLoading;
 
   return (
     <div className="bg-gradient-hero min-h-screen text-foreground">
+      {/* Sync progress bar */}
+      <AnimatePresence>
+        {syncing && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="bg-gradient-brand fixed top-0 left-0 z-50 h-0.5 w-full origin-left animate-pulse"
+            aria-label="Syncing your data"
+          />
+        )}
+      </AnimatePresence>
       {/* Decorative blobs */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
