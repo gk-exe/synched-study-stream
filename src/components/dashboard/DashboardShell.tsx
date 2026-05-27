@@ -18,7 +18,7 @@ const nav = [
   { label: "Overview", to: "/dashboard", icon: LayoutDashboard },
   { label: "Focus", to: "/dashboard", icon: Timer },
   { label: "Library", to: "/dashboard", icon: BookOpen },
-  { label: "Companion", to: "/dashboard", icon: Sparkles },
+  { label: "Companion", to: "/companion", icon: Sparkles },
   { label: "Settings", to: "/dashboard", icon: Settings },
 ];
 
