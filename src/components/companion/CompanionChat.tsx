@@ -7,6 +7,7 @@ import { Mic, Send, Sparkles, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useAppData, type Mood } from "@/hooks/use-app-data";
 
 const MOOD_PLACEHOLDERS: Record<string, string[]> = {
   calm: [
@@ -31,7 +32,7 @@ const MOOD_PLACEHOLDERS: Record<string, string[]> = {
   ],
 };
 
-const MOOD_OPTIONS: { id: keyof typeof MOOD_PLACEHOLDERS; label: string; emoji: string }[] = [
+const MOOD_OPTIONS: { id: Mood; label: string; emoji: string }[] = [
   { id: "calm", label: "Calm", emoji: "🌿" },
   { id: "focused", label: "Focused", emoji: "🎯" },
   { id: "tired", label: "Tired", emoji: "🌙" },
@@ -55,7 +56,7 @@ function getMessageText(parts: { type: string; text?: string }[]) {
 }
 
 export function CompanionChat() {
-  const [mood, setMood] = useState<keyof typeof MOOD_PLACEHOLDERS>("calm");
+  const { mood, setMood } = useAppData();
   const [input, setInput] = useState("");
   const [voiceUiActive, setVoiceUiActive] = useState(false);
 

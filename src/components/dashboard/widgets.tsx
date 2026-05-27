@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "@tanstack/react-router";
 import {
   Flame,
   Play,
@@ -15,6 +15,7 @@ import {
   BookOpen,
   SkipForward,
   Coins,
+  ArrowUpRight,
 } from "lucide-react";
 import {
   Area,
@@ -35,6 +36,7 @@ import {
   usePomodoro,
   type PomodoroMode,
 } from "@/hooks/use-pomodoro";
+import { useAppData } from "@/hooks/use-app-data";
 
 const card =
   "glass relative overflow-hidden rounded-3xl p-5 shadow-glow transition-all duration-300 hover:-translate-y-0.5";
@@ -43,18 +45,31 @@ function CardShell({
   children,
   className,
   delay = 0,
+  href,
+  hrefLabel,
 }: {
   children: React.ReactNode;
   className?: string;
   delay?: number;
+  href?: string;
+  hrefLabel?: string;
 }) {
   return (
     <motion.div
       initial={{ y: 16, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, delay, ease: "easeOut" }}
-      className={cn(card, className)}
+      className={cn(card, "group", className)}
     >
+      {href && (
+        <Link
+          to={href}
+          aria-label={hrefLabel ?? "Open"}
+          className="absolute top-3 right-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-foreground/5 text-muted-foreground opacity-0 transition-all group-hover:opacity-100 hover:bg-foreground/10 hover:text-foreground"
+        >
+          <ArrowUpRight className="h-4 w-4" />
+        </Link>
+      )}
       {children}
     </motion.div>
   );
@@ -69,7 +84,7 @@ export function StreakCard() {
   const todayIdx = (today + 6) % 7;
   const active = days.map((_, i) => i < todayIdx || (i === todayIdx && stats.completedToday > 0));
   return (
-    <CardShell delay={0.05}>
+    <CardShell delay={0.05} href="/analytics" hrefLabel="Open analytics">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs text-muted-foreground">Study streak</p>
@@ -115,7 +130,7 @@ export function FocusTimerCard() {
   const modes: PomodoroMode[] = ["focus", "short", "long"];
 
   return (
-    <CardShell delay={0.1} className="flex flex-col items-center text-center">
+    <CardShell delay={0.1} href="/focus" hrefLabel="Open focus timer" className="flex flex-col items-center text-center">
       <div className="flex w-full items-center justify-between">
         <p className="text-xs text-muted-foreground">Focus timer</p>
       </div>
@@ -202,7 +217,7 @@ export function FocusTimerCard() {
 export function RewardsCard() {
   const { stats } = usePomodoro();
   return (
-    <CardShell delay={0.12}>
+    <CardShell delay={0.12} href="/focus" hrefLabel="Open focus">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs text-muted-foreground">Reward coins</p>
@@ -232,18 +247,12 @@ export function RewardsCard() {
 }
 
 /* ---------- Daily goals ---------- */
-const goalList = [
-  { label: "Review organic chemistry notes", done: true },
-  { label: "Solve 10 calculus problems", done: true },
-  { label: "Read chapter 4 of psychology", done: false },
-  { label: "Practice Spanish vocab · 15 min", done: false },
-];
-
 export function DailyGoalsCard() {
-  const [goals, setGoals] = useState(goalList);
+  const { goals, toggleGoal } = useAppData();
   const done = goals.filter((g) => g.done).length;
+  const total = Math.max(goals.length, 1);
   return (
-    <CardShell delay={0.15}>
+    <CardShell delay={0.15} href="/goals" hrefLabel="Edit goals">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs text-muted-foreground">Today's goals</p>
@@ -252,17 +261,15 @@ export function DailyGoalsCard() {
           </p>
         </div>
         <span className="text-gradient-brand text-2xl font-semibold">
-          {Math.round((done / goals.length) * 100)}%
+          {Math.round((done / total) * 100)}%
         </span>
       </div>
-      <Progress value={(done / goals.length) * 100} className="mt-3 h-1.5" />
+      <Progress value={(done / total) * 100} className="mt-3 h-1.5" />
       <ul className="mt-4 space-y-2">
-        {goals.map((g, i) => (
-          <li key={i}>
+        {goals.slice(0, 5).map((g) => (
+          <li key={g.id}>
             <button
-              onClick={() =>
-                setGoals((prev) => prev.map((p, idx) => (idx === i ? { ...p, done: !p.done } : p)))
-              }
+              onClick={() => toggleGoal(g.id)}
               className="group flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-foreground/5"
             >
               {g.done ? (
@@ -283,6 +290,9 @@ export function DailyGoalsCard() {
             </button>
           </li>
         ))}
+        {goals.length === 0 && (
+          <li className="text-sm text-muted-foreground">No goals yet — add some in the Goals tab.</li>
+        )}
       </ul>
     </CardShell>
   );
@@ -304,7 +314,7 @@ export function QuoteCard() {
 /* ---------- AI companion preview ---------- */
 export function CompanionCard() {
   return (
-    <CardShell delay={0.25}>
+    <CardShell delay={0.25} href="/companion" hrefLabel="Open companion">
       <div className="flex items-center gap-2">
         <span className="bg-gradient-brand grid h-8 w-8 place-items-center rounded-xl shadow-glow">
           <Sparkles className="h-4 w-4 text-primary-foreground" />
@@ -352,7 +362,7 @@ const weekData = [
 
 export function ProductivityCard() {
   return (
-    <CardShell delay={0.1} className="lg:col-span-2">
+    <CardShell delay={0.1} href="/analytics" hrefLabel="Open analytics" className="lg:col-span-2">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs text-muted-foreground">Focus this week</p>
@@ -417,7 +427,7 @@ const subjectData = [
 
 export function SubjectBreakdownCard() {
   return (
-    <CardShell delay={0.15}>
+    <CardShell delay={0.15} href="/analytics" hrefLabel="Open analytics">
       <p className="text-xs text-muted-foreground">By subject</p>
       <p className="mt-1 text-sm font-medium">Hours this week</p>
       <div className="mt-3 h-40">
@@ -446,7 +456,7 @@ const sessions = [
 
 export function SessionHistoryCard() {
   return (
-    <CardShell delay={0.2} className="lg:col-span-2">
+    <CardShell delay={0.2} href="/analytics" hrefLabel="Open analytics" className="lg:col-span-2">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs text-muted-foreground">Recent sessions</p>

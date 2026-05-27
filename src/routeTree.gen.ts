@@ -12,8 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as GoalsRouteImport } from './routes/goals'
+import { Route as FocusRouteImport } from './routes/focus'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CompanionRouteImport } from './routes/companion'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
@@ -32,6 +35,16 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GoalsRoute = GoalsRouteImport.update({
+  id: '/goals',
+  path: '/goals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FocusRoute = FocusRouteImport.update({
+  id: '/focus',
+  path: '/focus',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -40,6 +53,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const CompanionRoute = CompanionRouteImport.update({
   id: '/companion',
   path: '/companion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -55,8 +73,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/companion': typeof CompanionRoute
   '/dashboard': typeof DashboardRoute
+  '/focus': typeof FocusRoute
+  '/goals': typeof GoalsRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
@@ -64,8 +85,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/companion': typeof CompanionRoute
   '/dashboard': typeof DashboardRoute
+  '/focus': typeof FocusRoute
+  '/goals': typeof GoalsRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
@@ -74,8 +98,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/companion': typeof CompanionRoute
   '/dashboard': typeof DashboardRoute
+  '/focus': typeof FocusRoute
+  '/goals': typeof GoalsRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
@@ -85,8 +112,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/analytics'
     | '/companion'
     | '/dashboard'
+    | '/focus'
+    | '/goals'
     | '/login'
     | '/onboarding'
     | '/signup'
@@ -94,8 +124,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/analytics'
     | '/companion'
     | '/dashboard'
+    | '/focus'
+    | '/goals'
     | '/login'
     | '/onboarding'
     | '/signup'
@@ -103,8 +136,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/analytics'
     | '/companion'
     | '/dashboard'
+    | '/focus'
+    | '/goals'
     | '/login'
     | '/onboarding'
     | '/signup'
@@ -113,8 +149,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnalyticsRoute: typeof AnalyticsRoute
   CompanionRoute: typeof CompanionRoute
   DashboardRoute: typeof DashboardRoute
+  FocusRoute: typeof FocusRoute
+  GoalsRoute: typeof GoalsRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   SignupRoute: typeof SignupRoute
@@ -144,6 +183,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/goals': {
+      id: '/goals'
+      path: '/goals'
+      fullPath: '/goals'
+      preLoaderRoute: typeof GoalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/focus': {
+      id: '/focus'
+      path: '/focus'
+      fullPath: '/focus'
+      preLoaderRoute: typeof FocusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -156,6 +209,13 @@ declare module '@tanstack/react-router' {
       path: '/companion'
       fullPath: '/companion'
       preLoaderRoute: typeof CompanionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -177,8 +237,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnalyticsRoute: AnalyticsRoute,
   CompanionRoute: CompanionRoute,
   DashboardRoute: DashboardRoute,
+  FocusRoute: FocusRoute,
+  GoalsRoute: GoalsRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   SignupRoute: SignupRoute,

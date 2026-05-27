@@ -117,7 +117,7 @@ function OnboardingInner() {
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("You're all set ✨");
-    navigate({ to: "/" });
+    navigate({ to: "/dashboard" });
   };
 
   if (loading || !user) return null;
