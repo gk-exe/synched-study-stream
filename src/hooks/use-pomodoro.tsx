@@ -8,6 +8,8 @@ import {
   useState,
 } from "react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
+import { fetchStats, upsertStats, logStudySession } from "@/lib/db";
 
 export type PomodoroMode = "focus" | "short" | "long";
 
@@ -56,6 +58,7 @@ type Ctx = {
   reset: () => void;
   skip: () => void;
   stats: Stats;
+  loading: boolean;
 };
 
 const PomodoroCtx = createContext<Ctx | null>(null);
@@ -88,30 +91,81 @@ function loadStats(): Stats {
 }
 
 export function PomodoroProvider({ children }: { children: React.ReactNode }) {
+  const { user, loading: authLoading } = useAuth();
   const [mode, setModeState] = useState<PomodoroMode>("focus");
   const [remaining, setRemaining] = useState(MODE_MINUTES.focus * 60);
   const [running, setRunning] = useState(false);
   const [stats, setStats] = useState<Stats>(defaultStats);
+  const [loading, setLoading] = useState(false);
+  const hydratedFromCloud = useRef(false);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // hydrate from localStorage
+  // Hydrate from localStorage (instant, works for guests)
   useEffect(() => {
     setStats(loadStats());
   }, []);
 
-  // persist
+  // When signed in, replace stats with cloud copy
+  useEffect(() => {
+    if (authLoading || !user) return;
+    let cancelled = false;
+    setLoading(true);
+    fetchStats(user.id)
+      .then((row) => {
+        if (cancelled) return;
+        if (row) {
+          const today = todayKey();
+          setStats({
+            coins: row.coins,
+            streak: row.streak,
+            lastCompletedDate: row.last_completed_date,
+            completedToday:
+              row.last_completed_date === today ? row.completed_today : 0,
+            totalFocusSessions: row.total_focus_sessions,
+            cycleCount: row.cycle_count,
+          });
+        }
+        hydratedFromCloud.current = true;
+      })
+      .catch((e) => toast.error(e.message ?? "Failed to load stats"))
+      .finally(() => !cancelled && setLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [user, authLoading]);
+
+  // Persist locally always; mirror to cloud when signed in & hydrated
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
     } catch {
       /* noop */
     }
-  }, [stats]);
+    if (user && hydratedFromCloud.current) {
+      upsertStats(user.id, {
+        coins: stats.coins,
+        streak: stats.streak,
+        last_completed_date: stats.lastCompletedDate,
+        completed_today: stats.completedToday,
+        total_focus_sessions: stats.totalFocusSessions,
+        cycle_count: stats.cycleCount,
+      }).catch(() => {
+        /* silent — local copy is source of truth */
+      });
+    }
+  }, [stats, user]);
 
   const total = MODE_MINUTES[mode] * 60;
 
   const completeSession = useCallback(() => {
     setRunning(false);
+    const completedMode = mode;
+    const completedDuration = MODE_MINUTES[mode] * 60;
+    if (user) {
+      logStudySession(user.id, completedMode, completedDuration).catch(() => {
+        /* non-blocking */
+      });
+    }
     if (mode === "focus") {
       setStats((prev) => {
         const today = todayKey();
@@ -151,7 +205,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
       setModeState("focus");
       setRemaining(MODE_MINUTES.focus * 60);
     }
-  }, [mode]);
+  }, [mode, user]);
 
   // tick
   useEffect(() => {
@@ -192,8 +246,8 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   }, [completeSession]);
 
   const value = useMemo<Ctx>(
-    () => ({ mode, setMode, remaining, total, running, start, pause, reset, skip, stats }),
-    [mode, setMode, remaining, total, running, start, pause, reset, skip, stats],
+    () => ({ mode, setMode, remaining, total, running, start, pause, reset, skip, stats, loading }),
+    [mode, setMode, remaining, total, running, start, pause, reset, skip, stats, loading],
   );
 
   return <PomodoroCtx.Provider value={value}>{children}</PomodoroCtx.Provider>;
