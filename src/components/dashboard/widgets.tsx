@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "@tanstack/react-router";
 import {
   Flame,
   Play,
@@ -15,6 +15,7 @@ import {
   BookOpen,
   SkipForward,
   Coins,
+  ArrowUpRight,
 } from "lucide-react";
 import {
   Area,
@@ -35,6 +36,7 @@ import {
   usePomodoro,
   type PomodoroMode,
 } from "@/hooks/use-pomodoro";
+import { useAppData } from "@/hooks/use-app-data";
 
 const card =
   "glass relative overflow-hidden rounded-3xl p-5 shadow-glow transition-all duration-300 hover:-translate-y-0.5";
@@ -43,18 +45,31 @@ function CardShell({
   children,
   className,
   delay = 0,
+  href,
+  hrefLabel,
 }: {
   children: React.ReactNode;
   className?: string;
   delay?: number;
+  href?: string;
+  hrefLabel?: string;
 }) {
   return (
     <motion.div
       initial={{ y: 16, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, delay, ease: "easeOut" }}
-      className={cn(card, className)}
+      className={cn(card, "group", className)}
     >
+      {href && (
+        <Link
+          to={href}
+          aria-label={hrefLabel ?? "Open"}
+          className="absolute top-3 right-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-foreground/5 text-muted-foreground opacity-0 transition-all group-hover:opacity-100 hover:bg-foreground/10 hover:text-foreground"
+        >
+          <ArrowUpRight className="h-4 w-4" />
+        </Link>
+      )}
       {children}
     </motion.div>
   );
