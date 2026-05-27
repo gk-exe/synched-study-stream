@@ -12,6 +12,8 @@ import appCss from "../styles.css?url";
 import { AuthProvider } from "@/hooks/use-auth";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { PomodoroProvider } from "@/hooks/use-pomodoro";
+import { AppDataProvider } from "@/hooks/use-app-data";
 
 function NotFoundComponent() {
   return (
@@ -122,8 +124,12 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <Outlet />
-          <Toaster />
+          <AppDataProvider>
+            <PomodoroProvider>
+              <Outlet />
+              <Toaster />
+            </PomodoroProvider>
+          </AppDataProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
