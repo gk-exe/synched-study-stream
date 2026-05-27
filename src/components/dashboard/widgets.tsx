@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Flame,
@@ -13,6 +13,8 @@ import {
   TrendingUp,
   Clock,
   BookOpen,
+  SkipForward,
+  Coins,
 } from "lucide-react";
 import {
   Area,
@@ -27,6 +29,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import {
+  MODE_LABEL,
+  MODE_MINUTES,
+  usePomodoro,
+  type PomodoroMode,
+} from "@/hooks/use-pomodoro";
 
 const card =
   "glass relative overflow-hidden rounded-3xl p-5 shadow-glow transition-all duration-300 hover:-translate-y-0.5";
@@ -55,14 +63,18 @@ function CardShell({
 /* ---------- Streak ---------- */
 export function StreakCard() {
   const days = ["M", "T", "W", "T", "F", "S", "S"];
-  const active = [true, true, true, true, false, false, false];
+  const { stats } = usePomodoro();
+  const today = new Date().getDay(); // 0..6 (Sun..Sat)
+  // map to Mon-first index
+  const todayIdx = (today + 6) % 7;
+  const active = days.map((_, i) => i < todayIdx || (i === todayIdx && stats.completedToday > 0));
   return (
     <CardShell delay={0.05}>
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs text-muted-foreground">Study streak</p>
           <div className="mt-2 flex items-end gap-2">
-            <span className="text-gradient-brand text-4xl font-semibold">12</span>
+            <span className="text-gradient-brand text-4xl font-semibold">{stats.streak}</span>
             <span className="mb-1 text-sm text-muted-foreground">days</span>
           </div>
         </div>
@@ -93,25 +105,36 @@ export function StreakCard() {
 
 /* ---------- Focus timer ---------- */
 export function FocusTimerCard() {
-  const total = 25 * 60;
-  const [remaining, setRemaining] = useState(18 * 60 + 24);
-  const [running, setRunning] = useState(false);
-
-  useEffect(() => {
-    if (!running) return;
-    const id = setInterval(() => setRemaining((r) => (r > 0 ? r - 1 : 0)), 1000);
-    return () => clearInterval(id);
-  }, [running]);
-
+  const { mode, setMode, remaining, total, running, start, pause, reset, skip } =
+    usePomodoro();
   const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
   const ss = String(remaining % 60).padStart(2, "0");
-  const pct = ((total - remaining) / total) * 100;
+  const pct = total === 0 ? 0 : ((total - remaining) / total) * 100;
   const r = 78;
   const c = 2 * Math.PI * r;
+  const modes: PomodoroMode[] = ["focus", "short", "long"];
 
   return (
     <CardShell delay={0.1} className="flex flex-col items-center text-center">
-      <p className="self-start text-xs text-muted-foreground">Focus timer</p>
+      <div className="flex w-full items-center justify-between">
+        <p className="text-xs text-muted-foreground">Focus timer</p>
+      </div>
+      <div className="glass mt-2 flex w-full items-center gap-1 rounded-full p-1 text-xs">
+        {modes.map((m) => (
+          <button
+            key={m}
+            onClick={() => setMode(m)}
+            className={cn(
+              "flex-1 rounded-full px-2 py-1.5 transition-colors",
+              mode === m
+                ? "bg-gradient-brand text-primary-foreground shadow-glow"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {MODE_LABEL[m]}
+          </button>
+        ))}
+      </div>
       <div className="relative mt-3 grid place-items-center">
         <svg width="200" height="200" className="-rotate-90">
           <circle cx="100" cy="100" r={r} stroke="currentColor" className="text-foreground/10" strokeWidth="10" fill="none" />
@@ -138,29 +161,71 @@ export function FocusTimerCard() {
           <span className="font-mono text-3xl font-semibold tabular-nums">
             {mm}:{ss}
           </span>
-          <span className="mt-1 text-xs text-muted-foreground">Deep work · Calculus</span>
+          <span className="mt-1 text-xs text-muted-foreground">
+            {MODE_LABEL[mode]} · {MODE_MINUTES[mode]} min
+          </span>
         </div>
       </div>
       <div className="mt-4 flex items-center gap-2">
         <Button
           size="sm"
-          onClick={() => setRunning((r) => !r)}
+          onClick={() => (running ? pause() : start())}
           className="bg-gradient-brand rounded-full px-5 text-primary-foreground shadow-glow hover:opacity-90"
         >
           {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          {running ? "Pause" : "Resume"}
+          {running ? "Pause" : remaining === total ? "Start" : "Resume"}
         </Button>
         <Button
           size="sm"
           variant="ghost"
-          onClick={() => {
-            setRunning(false);
-            setRemaining(total);
-          }}
+          onClick={reset}
           className="rounded-full"
+          aria-label="Reset"
         >
           <RotateCcw className="h-4 w-4" />
         </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={skip}
+          className="rounded-full"
+          aria-label="Skip session"
+        >
+          <SkipForward className="h-4 w-4" />
+        </Button>
+      </div>
+    </CardShell>
+  );
+}
+
+/* ---------- Rewards ---------- */
+export function RewardsCard() {
+  const { stats } = usePomodoro();
+  return (
+    <CardShell delay={0.12}>
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs text-muted-foreground">Reward coins</p>
+          <div className="mt-2 flex items-end gap-2">
+            <span className="text-gradient-brand text-4xl font-semibold">{stats.coins}</span>
+            <span className="mb-1 text-sm text-muted-foreground">earned</span>
+          </div>
+        </div>
+        <span className="bg-gradient-brand grid h-10 w-10 place-items-center rounded-xl shadow-glow">
+          <Coins className="h-5 w-5 text-primary-foreground" />
+        </span>
+      </div>
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <div className="bg-foreground/5 rounded-2xl p-3">
+          <p className="text-[11px] text-muted-foreground">Today</p>
+          <p className="mt-1 text-lg font-semibold">{stats.completedToday}</p>
+          <p className="text-[11px] text-muted-foreground">focus sessions</p>
+        </div>
+        <div className="bg-foreground/5 rounded-2xl p-3">
+          <p className="text-[11px] text-muted-foreground">All time</p>
+          <p className="mt-1 text-lg font-semibold">{stats.totalFocusSessions}</p>
+          <p className="text-[11px] text-muted-foreground">completed</p>
+        </div>
       </div>
     </CardShell>
   );
