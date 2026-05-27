@@ -1,11 +1,11 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   LayoutDashboard,
   Timer,
-  BookOpen,
+  Target,
+  BarChart3,
   Sparkles,
-  Settings,
   Moon,
   Sun,
   Bell,
@@ -16,15 +16,16 @@ import { cn } from "@/lib/utils";
 
 const nav = [
   { label: "Overview", to: "/dashboard", icon: LayoutDashboard },
-  { label: "Focus", to: "/dashboard", icon: Timer },
-  { label: "Library", to: "/dashboard", icon: BookOpen },
+  { label: "Focus", to: "/focus", icon: Timer },
+  { label: "Goals", to: "/goals", icon: Target },
+  { label: "Analytics", to: "/analytics", icon: BarChart3 },
   { label: "Companion", to: "/companion", icon: Sparkles },
-  { label: "Settings", to: "/dashboard", icon: Settings },
-];
+] as const;
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { theme, toggle } = useTheme();
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const isActive = (to: string) => pathname === to;
 
   return (
     <div className="bg-gradient-hero min-h-screen text-foreground">
@@ -45,8 +46,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </Link>
 
           <nav className="glass flex flex-1 flex-col gap-1 rounded-2xl p-2">
-            {nav.map((item, i) => {
-              const active = i === 0 && pathname === "/dashboard";
+            {nav.map((item) => {
+              const active = isActive(item.to);
               return (
                 <Link
                   key={item.label}
@@ -106,15 +107,25 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </div>
           </motion.header>
 
-          {children}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed bottom-3 left-1/2 z-50 w-[min(420px,calc(100%-1.5rem))] -translate-x-1/2 lg:hidden">
+      <nav className="fixed bottom-3 left-1/2 z-50 w-[min(460px,calc(100%-1.5rem))] -translate-x-1/2 lg:hidden">
         <div className="glass flex items-center justify-between rounded-2xl px-2 py-2 shadow-glow">
-          {nav.map((item, i) => {
-            const active = i === 0;
+          {nav.map((item) => {
+            const active = isActive(item.to);
             return (
               <Link
                 key={item.label}
