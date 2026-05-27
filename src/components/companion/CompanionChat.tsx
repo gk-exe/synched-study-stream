@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { Mic, Send, Sparkles, Square } from "lucide-react";
@@ -165,7 +165,7 @@ export function CompanionChat() {
         ) : (
           <ul className="space-y-4">
             <AnimatePresence initial={false}>
-              {messages.map((m) => (
+              {messages.map((m: UIMessage) => (
                 <motion.li
                   key={m.id}
                   initial={{ opacity: 0, y: 8 }}
