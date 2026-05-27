@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as FocusRouteImport } from './routes/focus'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CompanionRouteImport } from './routes/companion'
 import { Route as IndexRouteImport } from './routes/index'
@@ -30,6 +31,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FocusRoute = FocusRouteImport.update({
+  id: '/focus',
+  path: '/focus',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/companion': typeof CompanionRoute
   '/dashboard': typeof DashboardRoute
+  '/focus': typeof FocusRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/companion': typeof CompanionRoute
   '/dashboard': typeof DashboardRoute
+  '/focus': typeof FocusRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/companion': typeof CompanionRoute
   '/dashboard': typeof DashboardRoute
+  '/focus': typeof FocusRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/companion'
     | '/dashboard'
+    | '/focus'
     | '/login'
     | '/onboarding'
     | '/signup'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/companion'
     | '/dashboard'
+    | '/focus'
     | '/login'
     | '/onboarding'
     | '/signup'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/companion'
     | '/dashboard'
+    | '/focus'
     | '/login'
     | '/onboarding'
     | '/signup'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CompanionRoute: typeof CompanionRoute
   DashboardRoute: typeof DashboardRoute
+  FocusRoute: typeof FocusRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   SignupRoute: typeof SignupRoute
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/focus': {
+      id: '/focus'
+      path: '/focus'
+      fullPath: '/focus'
+      preLoaderRoute: typeof FocusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CompanionRoute: CompanionRoute,
   DashboardRoute: DashboardRoute,
+  FocusRoute: FocusRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   SignupRoute: SignupRoute,
