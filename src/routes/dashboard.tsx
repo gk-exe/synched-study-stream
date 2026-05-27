@@ -9,7 +9,9 @@ import {
   ProductivityCard,
   SubjectBreakdownCard,
   SessionHistoryCard,
+  RewardsCard,
 } from "@/components/dashboard/widgets";
+import { PomodoroProvider } from "@/hooks/use-pomodoro";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
@@ -23,20 +25,23 @@ export const Route = createFileRoute("/dashboard")({
 
 function DashboardPage() {
   return (
-    <DashboardShell>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <StreakCard />
-        <FocusTimerCard />
-        <QuoteCard />
+    <PomodoroProvider>
+      <DashboardShell>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <StreakCard />
+          <FocusTimerCard />
+          <RewardsCard />
 
-        <ProductivityCard />
-        <SubjectBreakdownCard />
+          <ProductivityCard />
+          <SubjectBreakdownCard />
+          <QuoteCard />
 
-        <DailyGoalsCard />
-        <CompanionCard />
+          <DailyGoalsCard />
+          <CompanionCard />
 
-        <SessionHistoryCard />
-      </div>
-    </DashboardShell>
+          <SessionHistoryCard />
+        </div>
+      </DashboardShell>
+    </PomodoroProvider>
   );
 }
