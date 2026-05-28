@@ -1,13 +1,19 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { Mic, Send, Sparkles, Square } from "lucide-react";
+import { Mic, RefreshCw, Send, Sparkles, Square, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAppData, type Mood } from "@/hooks/use-app-data";
+import { useAuth } from "@/hooks/use-auth";
+import {
+  fetchChatHistory,
+  insertChatMessage,
+  clearChatHistory,
+} from "@/lib/db";
 
 const MOOD_PLACEHOLDERS: Record<string, string[]> = {
   calm: [
@@ -57,12 +63,78 @@ function getMessageText(parts: { type: string; text?: string }[]) {
 
 export function CompanionChat() {
   const { mood, setMood } = useAppData();
+  const { user } = useAuth();
   const [input, setInput] = useState("");
   const [voiceUiActive, setVoiceUiActive] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [initialMessages, setInitialMessages] = useState<UIMessage[] | null>(null);
 
-  const { messages, sendMessage, status, stop, error } = useChat({
-    transport: new DefaultChatTransport({ api: "/api/chat" }),
+  // Keep latest mood available to the transport without rebuilding it.
+  const moodRef = useRef<Mood>(mood);
+  useEffect(() => {
+    moodRef.current = mood;
+  }, [mood]);
+
+  // Track last user message so we can persist + retry.
+  const lastUserTextRef = useRef<string | null>(null);
+
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        prepareSendMessagesRequest: ({ messages, id, body }) => ({
+          body: { ...body, id, messages, mood: moodRef.current },
+        }),
+      }),
+    [],
+  );
+
+  // Hydrate history for signed-in users.
+  useEffect(() => {
+    if (!user) {
+      setInitialMessages([]);
+      return;
+    }
+    let cancelled = false;
+    setHistoryLoading(true);
+    fetchChatHistory(user.id)
+      .then((rows) => {
+        if (cancelled) return;
+        setInitialMessages(
+          rows.map((r) => ({
+            id: r.id,
+            role: r.role as "user" | "assistant",
+            parts: [{ type: "text", text: r.content }],
+          })) as UIMessage[],
+        );
+      })
+      .catch((e) => toast.error(e.message ?? "Couldn't load chat history"))
+      .finally(() => !cancelled && setHistoryLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  const { messages, sendMessage, status, stop, error, regenerate, setMessages } = useChat({
+    transport,
+    messages: initialMessages ?? [],
+    onFinish: ({ message }) => {
+      if (!user || message.role !== "assistant") return;
+      const text = getMessageText(message.parts);
+      if (!text) return;
+      insertChatMessage(user.id, "assistant", text, moodRef.current).catch(() => {
+        /* non-blocking */
+      });
+    },
   });
+
+  // When history finishes loading after the hook is mounted, sync it in.
+  useEffect(() => {
+    if (initialMessages && initialMessages.length && messages.length === 0) {
+      setMessages(initialMessages);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialMessages]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -86,8 +158,31 @@ export function CompanionChat() {
   const handleSend = (text?: string) => {
     const value = (text ?? input).trim();
     if (!value || busy) return;
+    lastUserTextRef.current = value;
     sendMessage({ text: value });
     setInput("");
+    if (user) {
+      insertChatMessage(user.id, "user", value, moodRef.current).catch(() => {
+        /* non-blocking */
+      });
+    }
+  };
+
+  const handleRetry = () => {
+    if (busy) return;
+    regenerate();
+  };
+
+  const handleClear = async () => {
+    setMessages([]);
+    if (user) {
+      try {
+        await clearChatHistory(user.id);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Couldn't clear history";
+        toast.error(msg);
+      }
+    }
   };
 
   const handleVoiceClick = () => {
@@ -135,6 +230,16 @@ export function CompanionChat() {
             </button>
           ))}
         </div>
+        {messages.length > 0 && (
+          <button
+            onClick={handleClear}
+            className="ml-1 grid h-9 w-9 place-items-center rounded-xl text-muted-foreground transition-all hover:bg-foreground/5 hover:text-foreground"
+            aria-label="Clear conversation"
+            title="Clear conversation"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
       </motion.header>
 
       {/* Mood pills - mobile */}
@@ -161,7 +266,9 @@ export function CompanionChat() {
         ref={scrollRef}
         className="glass flex-1 overflow-y-auto rounded-3xl p-4 sm:p-6"
       >
-        {messages.length === 0 ? (
+        {historyLoading && messages.length === 0 ? (
+          <HistorySkeleton />
+        ) : messages.length === 0 ? (
           <EmptyState mood={mood} onPick={handleSend} />
         ) : (
           <ul className="space-y-4">
@@ -203,6 +310,22 @@ export function CompanionChat() {
             </AnimatePresence>
 
             {status === "submitted" && <TypingBubble />}
+
+            {error && !busy && (
+              <motion.li
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center justify-center"
+              >
+                <button
+                  onClick={handleRetry}
+                  className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs text-muted-foreground transition-all hover:-translate-y-0.5 hover:text-foreground"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  Couldn't reach Sync. Retry?
+                </button>
+              </motion.li>
+            )}
           </ul>
         )}
       </div>
