@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAppData } from "@/hooks/use-app-data";
 import { usePomodoro } from "@/hooks/use-pomodoro";
+import { CompanionPresence } from "@/components/companion/CompanionPresence";
 
 const nav = [
   { label: "Overview", to: "/dashboard", icon: LayoutDashboard },
@@ -90,7 +91,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 px-4 pt-6 pb-28 sm:px-6 lg:px-8 lg:pb-8">
+        <main className="flex-1 min-w-0 px-4 pt-5 pb-36 sm:px-6 lg:px-8 lg:pb-8">
           {/* Top bar (mobile + desktop) */}
           <motion.header
             initial={{ y: -10, opacity: 0 }}
@@ -139,8 +140,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed bottom-3 left-1/2 z-50 w-[min(460px,calc(100%-1.5rem))] -translate-x-1/2 lg:hidden">
-        <div className="glass flex items-center justify-between rounded-2xl px-2 py-2 shadow-glow">
+      <nav
+        className="fixed bottom-3 left-1/2 z-50 w-[min(460px,calc(100%-1.5rem))] -translate-x-1/2 lg:hidden"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        <div className="glass flex items-center justify-between rounded-2xl px-1.5 py-1.5 shadow-glow">
           {nav.map((item) => {
             const active = isActive(item.to);
             return (
@@ -148,13 +152,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 key={item.label}
                 to={item.to}
                 className={cn(
-                  "flex flex-1 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-[10px] transition-colors",
+                  "flex flex-1 flex-col items-center gap-0.5 rounded-xl px-1 py-1 text-[10px] transition-colors active:scale-95",
                   active ? "text-foreground" : "text-muted-foreground",
                 )}
               >
                 <span
                   className={cn(
-                    "grid h-8 w-8 place-items-center rounded-lg",
+                    "grid h-8 w-8 place-items-center rounded-lg transition-all",
                     active && "bg-gradient-brand text-primary-foreground shadow-glow",
                   )}
                 >
@@ -166,6 +170,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           })}
         </div>
       </nav>
+
+      {/* Persistent AI companion presence */}
+      <CompanionPresence />
     </div>
   );
 }
