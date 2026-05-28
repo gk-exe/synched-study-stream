@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { ArrowRight, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { fetchOnboarded, setCachedOnboarded } from "@/lib/onboarding";
 
 export const Route = createFileRoute("/onboarding")({
   component: OnboardingPage,
@@ -46,6 +47,18 @@ function OnboardingInner() {
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
   }, [user, loading, navigate]);
+
+  // If the user already completed onboarding, skip straight to the dashboard.
+  useEffect(() => {
+    if (!user) return;
+    fetchOnboarded(user.id)
+      .then((done) => {
+        if (done) navigate({ to: "/dashboard" });
+      })
+      .catch(() => {
+        /* ignore — let the user proceed through onboarding */
+      });
+  }, [user, navigate]);
 
   const toggle = (arr: string[], setArr: (v: string[]) => void, v: string) =>
     setArr(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
@@ -116,6 +129,7 @@ function OnboardingInner() {
       .eq("id", user.id);
     setSaving(false);
     if (error) return toast.error(error.message);
+    setCachedOnboarded(true);
     toast.success("You're all set ✨");
     navigate({ to: "/dashboard" });
   };

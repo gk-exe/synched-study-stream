@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { resolvePostAuthRoute, getCachedOnboarded } from "@/lib/onboarding";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
@@ -33,7 +34,10 @@ function SignupInner() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) navigate({ to: "/onboarding" });
+    if (!user) return;
+    const cached = getCachedOnboarded();
+    if (cached !== null) navigate({ to: cached ? "/dashboard" : "/onboarding" });
+    resolvePostAuthRoute(user.id).then((to) => navigate({ to }));
   }, [user, navigate]);
 
   const submit = async (e: React.FormEvent) => {
