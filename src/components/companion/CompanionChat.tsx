@@ -430,6 +430,26 @@ function TypingBubble() {
   );
 }
 
+function HistorySkeleton() {
+  return (
+    <div className="space-y-4">
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          className={cn("flex gap-3", i % 2 === 0 ? "justify-start" : "justify-end")}
+        >
+          <div
+            className={cn(
+              "bg-foreground/5 h-12 animate-pulse rounded-2xl",
+              i % 2 === 0 ? "w-2/3" : "w-1/2",
+            )}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function EmptyState({
   mood,
   onPick,
