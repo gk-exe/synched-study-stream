@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { createLovableGateway } from "@/lib/ai-gateway";
 
-const SYSTEM_PROMPT = `You are Sync, a warm, supportive AI study companion inside StudySync AI.
+const BASE_PROMPT = `You are Sync, a warm, supportive AI study companion inside StudySync AI.
 
 Voice & tone:
 - Calm, encouraging, emotionally intelligent. Speak like a kind friend who also happens to be a great tutor.
@@ -23,6 +23,13 @@ Formatting:
 
 You do not have memory of past sessions yet. If the user references something earlier, kindly ask them to share context again.`;
 
+const MOOD_GUIDANCE: Record<string, string> = {
+  calm: "The student feels calm. Match their pace — soft, unhurried, curious. Invite gentle exploration.",
+  focused: "The student feels focused. Be crisp and direct. Skip preamble. Help them go deeper, faster.",
+  tired: "The student feels tired. Lead with empathy. Suggest the smallest possible next step (≤5 min) or a real rest. No new pressure.",
+  anxious: "The student feels anxious. Acknowledge the feeling first. Slow down. Offer a single grounding step before any study suggestion.",
+};
+
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
@@ -32,13 +39,15 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Missing LOVABLE_API_KEY", { status: 500 });
         }
 
-        let body: { messages?: UIMessage[] };
+        let body: { messages?: UIMessage[]; mood?: string };
         try {
           body = await request.json();
         } catch {
           return new Response("Invalid JSON", { status: 400 });
         }
         const messages = body.messages ?? [];
+        const mood = body.mood && MOOD_GUIDANCE[body.mood] ? body.mood : "calm";
+        const system = `${BASE_PROMPT}\n\nCurrent mood: ${mood}.\n${MOOD_GUIDANCE[mood]}`;
 
         const gateway = createLovableGateway(apiKey);
         const model = gateway("google/gemini-3-flash-preview");
@@ -46,12 +55,19 @@ export const Route = createFileRoute("/api/chat")({
         try {
           const result = streamText({
             model,
-            system: SYSTEM_PROMPT,
+            system,
             messages: await convertToModelMessages(messages),
           });
           return result.toUIMessageStreamResponse();
         } catch (err) {
           const message = err instanceof Error ? err.message : "Unknown error";
+          const lower = message.toLowerCase();
+          if (lower.includes("429") || lower.includes("rate")) {
+            return new Response("Rate limit reached. Please try again in a moment.", { status: 429 });
+          }
+          if (lower.includes("402") || lower.includes("credit")) {
+            return new Response("AI credits exhausted. Add credits in Workspace settings.", { status: 402 });
+          }
           return new Response(message, { status: 500 });
         }
       },
