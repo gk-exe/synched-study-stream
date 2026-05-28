@@ -113,3 +113,34 @@ export async function fetchLatestMood(userId: string) {
   if (error) throw error;
   return data;
 }
+
+/* ---------- chat_messages ---------- */
+export type ChatRole = "user" | "assistant";
+
+export async function fetchChatHistory(userId: string, limit = 100) {
+  const { data, error } = await supabase
+    .from("chat_messages")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true })
+    .limit(limit);
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function insertChatMessage(
+  userId: string,
+  role: ChatRole,
+  content: string,
+  mood?: string,
+) {
+  const { error } = await supabase
+    .from("chat_messages")
+    .insert({ user_id: userId, role, content, mood: mood ?? null });
+  if (error) throw error;
+}
+
+export async function clearChatHistory(userId: string) {
+  const { error } = await supabase.from("chat_messages").delete().eq("user_id", userId);
+  if (error) throw error;
+}
