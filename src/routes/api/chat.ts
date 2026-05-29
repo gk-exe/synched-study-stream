@@ -47,7 +47,7 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Missing LOVABLE_API_KEY", { status: 500 });
         }
 
-        let body: { messages?: UIMessage[]; mood?: string };
+        let body: { messages?: UIMessage[]; mood?: string; tutor?: boolean };
         try {
           body = await request.json();
         } catch {
