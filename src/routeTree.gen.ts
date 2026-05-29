@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as GoalsRouteImport } from './routes/goals'
 import { Route as FocusRouteImport } from './routes/focus'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CustomizeRouteImport } from './routes/customize'
 import { Route as CompanionRouteImport } from './routes/companion'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
@@ -50,6 +51,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CustomizeRoute = CustomizeRouteImport.update({
+  id: '/customize',
+  path: '/customize',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompanionRoute = CompanionRouteImport.update({
   id: '/companion',
   path: '/companion',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/companion': typeof CompanionRoute
+  '/customize': typeof CustomizeRoute
   '/dashboard': typeof DashboardRoute
   '/focus': typeof FocusRoute
   '/goals': typeof GoalsRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/companion': typeof CompanionRoute
+  '/customize': typeof CustomizeRoute
   '/dashboard': typeof DashboardRoute
   '/focus': typeof FocusRoute
   '/goals': typeof GoalsRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/companion': typeof CompanionRoute
+  '/customize': typeof CustomizeRoute
   '/dashboard': typeof DashboardRoute
   '/focus': typeof FocusRoute
   '/goals': typeof GoalsRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/companion'
+    | '/customize'
     | '/dashboard'
     | '/focus'
     | '/goals'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/companion'
+    | '/customize'
     | '/dashboard'
     | '/focus'
     | '/goals'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/companion'
+    | '/customize'
     | '/dashboard'
     | '/focus'
     | '/goals'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyticsRoute: typeof AnalyticsRoute
   CompanionRoute: typeof CompanionRoute
+  CustomizeRoute: typeof CustomizeRoute
   DashboardRoute: typeof DashboardRoute
   FocusRoute: typeof FocusRoute
   GoalsRoute: typeof GoalsRoute
@@ -204,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/customize': {
+      id: '/customize'
+      path: '/customize'
+      fullPath: '/customize'
+      preLoaderRoute: typeof CustomizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/companion': {
       id: '/companion'
       path: '/companion'
@@ -239,6 +259,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
   CompanionRoute: CompanionRoute,
+  CustomizeRoute: CustomizeRoute,
   DashboardRoute: DashboardRoute,
   FocusRoute: FocusRoute,
   GoalsRoute: GoalsRoute,
@@ -250,3 +271,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
