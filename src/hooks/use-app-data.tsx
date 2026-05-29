@@ -14,6 +14,8 @@ import {
   deleteGoal,
   fetchLatestMood,
   logMood,
+  fetchSessionsSince,
+  type DbSession,
 } from "@/lib/db";
 import { toast } from "sonner";
 
@@ -29,17 +31,14 @@ type AppData = {
   mood: Mood;
   setMood: (m: Mood) => void;
   loading: boolean;
+  recentSessions: DbSession[];
+  reloadSessions: () => void;
 };
 
 const GOALS_KEY = "studysync:goals:v1";
 const MOOD_KEY = "studysync:mood:v1";
 
-const defaultGoals: Goal[] = [
-  { id: "g1", label: "Review organic chemistry notes", done: true },
-  { id: "g2", label: "Solve 10 calculus problems", done: true },
-  { id: "g3", label: "Read chapter 4 of psychology", done: false },
-  { id: "g4", label: "Practice Spanish vocab · 15 min", done: false },
-];
+const defaultGoals: Goal[] = [];
 
 const Ctx = createContext<AppData | null>(null);
 
@@ -58,6 +57,8 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [goals, setGoals] = useState<Goal[]>(defaultGoals);
   const [mood, setMoodState] = useState<Mood>("calm");
   const [loading, setLoading] = useState(false);
+  const [recentSessions, setRecentSessions] = useState<DbSession[]>([]);
+  const [sessionsTick, setSessionsTick] = useState(0);
 
   // Hydrate from localStorage immediately (guest mode + optimistic UI)
   useEffect(() => {
@@ -70,8 +71,14 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     if (authLoading || !user) return;
     let cancelled = false;
     setLoading(true);
-    Promise.all([fetchGoals(user.id), fetchLatestMood(user.id)])
-      .then(([dbGoals, latestMood]) => {
+    const since = new Date();
+    since.setDate(since.getDate() - 30);
+    Promise.all([
+      fetchGoals(user.id),
+      fetchLatestMood(user.id),
+      fetchSessionsSince(user.id, since.toISOString()),
+    ])
+      .then(([dbGoals, latestMood, sessions]) => {
         if (cancelled) return;
         setGoals(
           dbGoals.length > 0
@@ -79,13 +86,16 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
             : [],
         );
         if (latestMood) setMoodState(latestMood.mood as Mood);
+        setRecentSessions(sessions);
       })
       .catch((e) => toast.error(e.message ?? "Failed to load your data"))
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
     };
-  }, [user, authLoading]);
+  }, [user, authLoading, sessionsTick]);
+
+  const reloadSessions = useCallback(() => setSessionsTick((n) => n + 1), []);
 
   // Persist locally for guests + fast reload
   useEffect(() => {
@@ -156,8 +166,8 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo<AppData>(
-    () => ({ goals, addGoal, toggleGoal, removeGoal, renameGoal, mood, setMood, loading }),
-    [goals, addGoal, toggleGoal, removeGoal, renameGoal, mood, setMood, loading],
+    () => ({ goals, addGoal, toggleGoal, removeGoal, renameGoal, mood, setMood, loading, recentSessions, reloadSessions }),
+    [goals, addGoal, toggleGoal, removeGoal, renameGoal, mood, setMood, loading, recentSessions, reloadSessions],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
