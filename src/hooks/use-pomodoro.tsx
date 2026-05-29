@@ -254,7 +254,6 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
         });
         return {
           ...prev,
-          coins: prev.coins + COINS_PER_FOCUS,
           streak,
           lastCompletedDate: today,
           completedToday,
