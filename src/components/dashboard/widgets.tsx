@@ -16,6 +16,7 @@ import {
   SkipForward,
   Coins,
   ArrowUpRight,
+  Activity,
 } from "lucide-react";
 import {
   Area,
@@ -37,6 +38,8 @@ import {
   type PomodoroMode,
 } from "@/hooks/use-pomodoro";
 import { useAppData } from "@/hooks/use-app-data";
+import { useMemo } from "react";
+import type { DbSession } from "@/lib/db";
 
 const card =
   "glass relative overflow-hidden rounded-3xl p-5 shadow-glow transition-all duration-300 hover:-translate-y-0.5";
@@ -230,16 +233,21 @@ export function RewardsCard() {
           <Coins className="h-5 w-5 text-primary-foreground" />
         </span>
       </div>
-      <div className="mt-5 grid grid-cols-2 gap-3">
+      <div className="mt-5 grid grid-cols-3 gap-2">
         <div className="bg-foreground/5 rounded-2xl p-3">
           <p className="text-[11px] text-muted-foreground">Today</p>
           <p className="mt-1 text-lg font-semibold">{stats.completedToday}</p>
-          <p className="text-[11px] text-muted-foreground">focus sessions</p>
+          <p className="text-[11px] text-muted-foreground">sessions</p>
         </div>
         <div className="bg-foreground/5 rounded-2xl p-3">
-          <p className="text-[11px] text-muted-foreground">All time</p>
+          <p className="text-[11px] text-muted-foreground">Total</p>
           <p className="mt-1 text-lg font-semibold">{stats.totalFocusSessions}</p>
-          <p className="text-[11px] text-muted-foreground">completed</p>
+          <p className="text-[11px] text-muted-foreground">all-time</p>
+        </div>
+        <div className="bg-foreground/5 rounded-2xl p-3">
+          <p className="text-[11px] text-muted-foreground">Momentum</p>
+          <p className="mt-1 text-lg font-semibold">{stats.momentumScore}</p>
+          <p className="text-[11px] text-muted-foreground">/ 100</p>
         </div>
       </div>
     </CardShell>
@@ -350,46 +358,55 @@ export function CompanionCard() {
 }
 
 /* ---------- Productivity graph ---------- */
-const weekData = [
-  { d: "Mon", h: 2.4 },
-  { d: "Tue", h: 3.1 },
-  { d: "Wed", h: 4.2 },
-  { d: "Thu", h: 2.8 },
-  { d: "Fri", h: 3.6 },
-  { d: "Sat", h: 1.6 },
-  { d: "Sun", h: 2.9 },
-];
+function useWeekData(sessions: DbSession[]) {
+  return useMemo(() => {
+    const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const days: { d: string; h: number }[] = [];
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const day = new Date(today);
+      day.setDate(today.getDate() - i);
+      const key = day.toISOString().slice(0, 10);
+      const seconds = sessions
+        .filter((s) => s.mode === "focus" && s.completed_at.slice(0, 10) === key)
+        .reduce((a, s) => a + s.duration_seconds, 0);
+      days.push({
+        d: labels[(day.getDay() + 6) % 7],
+        h: Math.round((seconds / 3600) * 10) / 10,
+      });
+    }
+    return days;
+  }, [sessions]);
+}
 
 export function ProductivityCard() {
+  const { recentSessions } = useAppData();
+  const weekData = useWeekData(recentSessions);
+  const totalHours = weekData.reduce((a, d) => a + d.h, 0);
+  const focusToday = weekData[weekData.length - 1]?.h ?? 0;
   return (
     <CardShell delay={0.1} href="/analytics" hrefLabel="Open analytics" className="lg:col-span-2">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs text-muted-foreground">Focus this week</p>
           <div className="mt-1 flex items-end gap-2">
-            <span className="text-2xl font-semibold">20.6h</span>
-            <span className="mb-0.5 inline-flex items-center gap-1 text-xs text-emerald-500">
-              <TrendingUp className="h-3 w-3" /> +18%
-            </span>
+            <span className="text-2xl font-semibold">{totalHours.toFixed(1)}h</span>
+            {focusToday > 0 && (
+              <span className="mb-0.5 inline-flex items-center gap-1 text-xs text-emerald-500">
+                <TrendingUp className="h-3 w-3" /> {focusToday.toFixed(1)}h today
+              </span>
+            )}
           </div>
-        </div>
-        <div className="hidden gap-2 sm:flex">
-          {["Week", "Month", "Year"].map((t, i) => (
-            <button
-              key={t}
-              className={cn(
-                "rounded-full px-3 py-1 text-xs transition-colors",
-                i === 0
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:bg-foreground/5",
-              )}
-            >
-              {t}
-            </button>
-          ))}
         </div>
       </div>
       <div className="mt-4 h-48">
+      {totalHours === 0 ? (
+        <div className="flex h-full flex-col items-center justify-center text-center">
+          <Activity className="h-6 w-6 text-muted-foreground/60" />
+          <p className="mt-2 text-sm text-muted-foreground">No focus time yet this week.</p>
+          <p className="text-xs text-muted-foreground/70">Start a session — every minute counts.</p>
+        </div>
+      ) : (
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={weekData} margin={{ top: 10, right: 0, left: -28, bottom: 0 }}>
             <defs>
@@ -413,63 +430,107 @@ export function ProductivityCard() {
             <Area type="monotone" dataKey="h" stroke="oklch(0.65 0.2 290)" strokeWidth={2.5} fill="url(#area-grad)" />
           </AreaChart>
         </ResponsiveContainer>
+      )}
       </div>
     </CardShell>
   );
 }
 
-const subjectData = [
-  { s: "Math", v: 8 },
-  { s: "Chem", v: 5 },
-  { s: "Psych", v: 4 },
-  { s: "Span", v: 3 },
-];
-
 export function SubjectBreakdownCard() {
+  const { recentSessions } = useAppData();
+  const data = useMemo(() => {
+    const sevenDaysAgo = Date.now() - 7 * 86400_000;
+    const within = recentSessions.filter((s) => new Date(s.completed_at).getTime() >= sevenDaysAgo);
+    const bucket = { focus: 0, short: 0, long: 0 } as Record<string, number>;
+    within.forEach((s) => (bucket[s.mode] = (bucket[s.mode] ?? 0) + s.duration_seconds));
+    return [
+      { s: "Focus", v: Math.round((bucket.focus / 3600) * 10) / 10 },
+      { s: "Short", v: Math.round((bucket.short / 3600) * 10) / 10 },
+      { s: "Long", v: Math.round((bucket.long / 3600) * 10) / 10 },
+    ];
+  }, [recentSessions]);
+  const empty = data.every((d) => d.v === 0);
   return (
     <CardShell delay={0.15} href="/analytics" hrefLabel="Open analytics">
-      <p className="text-xs text-muted-foreground">By subject</p>
-      <p className="mt-1 text-sm font-medium">Hours this week</p>
+      <p className="text-xs text-muted-foreground">Time balance</p>
+      <p className="mt-1 text-sm font-medium">Focus vs breaks · 7 days</p>
       <div className="mt-3 h-40">
+      {empty ? (
+        <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+          No sessions logged yet.
+        </div>
+      ) : (
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={subjectData} margin={{ top: 6, right: 0, left: -28, bottom: 0 }}>
+          <BarChart data={data} margin={{ top: 6, right: 0, left: -28, bottom: 0 }}>
             <XAxis dataKey="s" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "currentColor", opacity: 0.5 }} />
             <Tooltip
               contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12 }}
-              formatter={(v) => [`${v}h`, "Focus"]}
+              formatter={(v) => [`${v}h`, "Time"]}
             />
             <Bar dataKey="v" radius={[8, 8, 4, 4]} fill="oklch(0.72 0.14 230)" />
           </BarChart>
         </ResponsiveContainer>
+      )}
       </div>
     </CardShell>
   );
 }
 
 /* ---------- Session history ---------- */
-const sessions = [
-  { subject: "Calculus", topic: "Integration by parts", duration: "45 min", when: "Today, 2:15 PM", focus: 94 },
-  { subject: "Chemistry", topic: "Organic reactions", duration: "30 min", when: "Today, 11:00 AM", focus: 88 },
-  { subject: "Psychology", topic: "Memory & attention", duration: "1 h 10 min", when: "Yesterday", focus: 76 },
-  { subject: "Spanish", topic: "Subjunctive mood", duration: "20 min", when: "Yesterday", focus: 82 },
-];
+function formatRelative(iso: string) {
+  const d = new Date(iso);
+  const diff = Date.now() - d.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days}d ago`;
+  return d.toLocaleDateString();
+}
+
+function formatDuration(seconds: number) {
+  const mins = Math.round(seconds / 60);
+  if (mins < 60) return `${mins} min`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m === 0 ? `${h} h` : `${h} h ${m} min`;
+}
+
+const MODE_LABEL_MAP: Record<string, string> = {
+  focus: "Focus session",
+  short: "Short break",
+  long: "Long break",
+};
 
 export function SessionHistoryCard() {
+  const { recentSessions } = useAppData();
+  const sessions = recentSessions.slice(0, 6);
   return (
     <CardShell delay={0.2} href="/analytics" hrefLabel="Open analytics" className="lg:col-span-2">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs text-muted-foreground">Recent sessions</p>
-          <p className="mt-1 text-sm font-medium">Your last study blocks</p>
+          <p className="mt-1 text-sm font-medium">
+            {sessions.length > 0 ? "Your last study blocks" : "Nothing here yet"}
+          </p>
         </div>
-        <Button variant="ghost" size="sm" className="rounded-full text-xs">
+        <Link to="/analytics" className="text-xs text-muted-foreground hover:text-foreground">
           View all
-        </Button>
+        </Link>
       </div>
+      {sessions.length === 0 ? (
+        <div className="mt-6 flex flex-col items-center gap-1 py-6 text-center">
+          <BookOpen className="h-6 w-6 text-muted-foreground/60" />
+          <p className="text-sm text-muted-foreground">Your timeline starts with your first session.</p>
+        </div>
+      ) : (
       <ul className="mt-4 divide-y divide-border/40">
         {sessions.map((s, i) => (
           <motion.li
-            key={i}
+            key={s.id}
             initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.25 + i * 0.05 }}
@@ -479,22 +540,22 @@ export function SessionHistoryCard() {
               <BookOpen className="h-4 w-4 text-muted-foreground" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">{s.subject}</p>
-              <p className="truncate text-xs text-muted-foreground">{s.topic}</p>
+              <p className="truncate text-sm font-medium">{MODE_LABEL_MAP[s.mode] ?? s.mode}</p>
+              <p className="truncate text-xs text-muted-foreground">{formatRelative(s.completed_at)}</p>
             </div>
             <div className="hidden text-right sm:block">
-              <p className="text-xs font-medium">{s.duration}</p>
-              <p className="text-[11px] text-muted-foreground">{s.when}</p>
+              <p className="text-xs font-medium">{formatDuration(s.duration_seconds)}</p>
             </div>
             <div className="flex items-center gap-1.5">
               <Clock className="h-3 w-3 text-muted-foreground sm:hidden" />
-              <span className="bg-foreground/5 rounded-full px-2 py-0.5 text-[11px] font-medium">
-                {s.focus}%
+              <span className="bg-foreground/5 rounded-full px-2 py-0.5 text-[11px] font-medium sm:hidden">
+                {formatDuration(s.duration_seconds)}
               </span>
             </div>
           </motion.li>
         ))}
       </ul>
+      )}
     </CardShell>
   );
 }
