@@ -96,6 +96,17 @@ export async function fetchRecentSessions(userId: string, limit = 20) {
   return data ?? [];
 }
 
+export async function fetchSessionsSince(userId: string, sinceISO: string) {
+  const { data, error } = await supabase
+    .from("study_sessions")
+    .select("*")
+    .eq("user_id", userId)
+    .gte("completed_at", sinceISO)
+    .order("completed_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
 /* ---------- mood_logs ---------- */
 export async function logMood(userId: string, mood: "calm" | "focused" | "tired" | "anxious") {
   const { error } = await supabase.from("mood_logs").insert({ user_id: userId, mood });

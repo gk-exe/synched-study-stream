@@ -31,6 +31,16 @@ export function CompanionPresence() {
 
   const messages = useMemo(() => {
     const base: string[] = [];
+    // Milestone & consistency recognition
+    if (stats.streak === 3) base.push("Three days in. The rhythm is building.");
+    if (stats.streak === 7) base.push("A whole week. You showed up — that's real.");
+    if (stats.streak >= 14 && stats.streak % 7 === 0)
+      base.push(`${stats.streak} days. Consistency like this changes things.`);
+    if (stats.totalFocusSessions > 0 && stats.totalFocusSessions % 10 === 0)
+      base.push(`${stats.totalFocusSessions} sessions together. Proud of you.`);
+    if (stats.momentumScore >= 80) base.push("You've been really consistent lately.");
+    if (stats.momentumScore <= 30) base.push("Even one small session today would help.");
+
     if (running && mode === "focus") {
       base.push("You're in flow — I'm right here with you.");
       base.push("Keep going. One breath, one line at a time.");
@@ -39,16 +49,16 @@ export function CompanionPresence() {
       base.push("Let your mind wander for a moment.");
     } else {
       if (stats.completedToday > 0)
-        base.push(`Proud of you — ${stats.completedToday} session${stats.completedToday > 1 ? "s" : ""} today.`);
+        base.push(`${stats.completedToday} session${stats.completedToday > 1 ? "s" : ""} today — nice work.`);
       if (stats.streak >= 2)
-        base.push(`${stats.streak}-day streak. That consistency is real.`);
+        base.push(`${stats.streak}-day streak holding steady.`);
       base.push("Ready when you are. No pressure.");
     }
     if (mood === "tired") base.push("Be gentle with yourself today.");
     if (mood === "anxious") base.push("Inhale 4 · hold 4 · exhale 6. I'll wait.");
     if (mood === "focused") base.push("You've got the room. Go deep.");
     return base;
-  }, [running, mode, mood, stats.completedToday, stats.streak]);
+  }, [running, mode, mood, stats.completedToday, stats.streak, stats.totalFocusSessions, stats.momentumScore]);
 
   useEffect(() => {
     setIdx(0);

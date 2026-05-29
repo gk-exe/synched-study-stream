@@ -9,6 +9,7 @@ import {
   Moon,
   Sun,
   Bell,
+  Palette,
 } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ const nav = [
   { label: "Goals", to: "/goals", icon: Target },
   { label: "Analytics", to: "/analytics", icon: BarChart3 },
   { label: "Companion", to: "/companion", icon: Sparkles },
+  { label: "Customize", to: "/customize", icon: Palette },
 ] as const;
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {

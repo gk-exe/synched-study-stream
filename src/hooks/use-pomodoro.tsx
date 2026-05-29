@@ -29,6 +29,22 @@ const COINS_PER_FOCUS = 10;
 const SESSIONS_BEFORE_LONG = 4;
 const STORAGE_KEY = "studysync:pomodoro:v1";
 
+/** Streak day milestones that grant bonus coins */
+const STREAK_MILESTONES: Record<number, number> = {
+  3: 15,
+  7: 30,
+  14: 50,
+  30: 100,
+  60: 150,
+  100: 250,
+};
+/** Bonus coins every N total focus sessions */
+const SESSION_MILESTONE_EVERY = 10;
+const SESSION_MILESTONE_BONUS = 20;
+/** Long-break overrun penalty */
+const LONG_BREAK_SOFT_CAP = 2;
+const OVERRUN_PENALTY = 5;
+
 type Stats = {
   coins: number;
   streak: number;
@@ -36,6 +52,12 @@ type Stats = {
   completedToday: number;
   totalFocusSessions: number;
   cycleCount: number; // focus sessions since last long break
+  momentumScore: number; // 0..100
+  companionTheme: string;
+  unlockedThemes: string[];
+  currentTask: string | null;
+  longBreaksToday: number;
+  lastBreakDate: string | null;
 };
 
 const defaultStats: Stats = {
@@ -45,6 +67,12 @@ const defaultStats: Stats = {
   completedToday: 0,
   totalFocusSessions: 0,
   cycleCount: 0,
+  momentumScore: 50,
+  companionTheme: "aurora",
+  unlockedThemes: ["aurora"],
+  currentTask: null,
+  longBreaksToday: 0,
+  lastBreakDate: null,
 };
 
 type Ctx = {
@@ -59,6 +87,9 @@ type Ctx = {
   skip: () => void;
   stats: Stats;
   loading: boolean;
+  setCurrentTask: (task: string | null) => void;
+  setCompanionTheme: (id: string) => void;
+  unlockTheme: (id: string, cost: number) => boolean;
 };
 
 const PomodoroCtx = createContext<Ctx | null>(null);
@@ -83,6 +114,14 @@ function loadStats(): Stats {
     // Reset completedToday if day rolled over
     if (parsed.lastCompletedDate && parsed.lastCompletedDate !== todayKey()) {
       parsed.completedToday = 0;
+    }
+    // Reset long-breaks counter if day rolled over
+    if (parsed.lastBreakDate && parsed.lastBreakDate !== todayKey()) {
+      parsed.longBreaksToday = 0;
+    }
+    // Gentle momentum decay if missed a day
+    if (parsed.lastCompletedDate && parsed.lastCompletedDate !== todayKey() && !isYesterday(parsed.lastCompletedDate)) {
+      parsed.momentumScore = Math.max(20, (parsed.momentumScore ?? 50) - 10);
     }
     return parsed;
   } catch {
@@ -123,6 +162,13 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
               row.last_completed_date === today ? row.completed_today : 0,
             totalFocusSessions: row.total_focus_sessions,
             cycleCount: row.cycle_count,
+            momentumScore: (row as any).momentum_score ?? 50,
+            companionTheme: (row as any).companion_theme ?? "aurora",
+            unlockedThemes: ((row as any).unlocked_themes as string[] | null) ?? ["aurora"],
+            currentTask: (row as any).current_task ?? null,
+            longBreaksToday:
+              (row as any).last_break_date === today ? ((row as any).long_breaks_today ?? 0) : 0,
+            lastBreakDate: (row as any).last_break_date ?? null,
           });
         }
         hydratedFromCloud.current = true;
@@ -149,6 +195,12 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
         completed_today: stats.completedToday,
         total_focus_sessions: stats.totalFocusSessions,
         cycle_count: stats.cycleCount,
+        momentum_score: stats.momentumScore,
+        companion_theme: stats.companionTheme,
+        unlocked_themes: stats.unlockedThemes,
+        current_task: stats.currentTask,
+        long_breaks_today: stats.longBreaksToday,
+        last_break_date: stats.lastBreakDate,
       }).catch(() => {
         /* silent — local copy is source of truth */
       });
@@ -180,16 +232,35 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
         const completedToday =
           prev.lastCompletedDate === today ? prev.completedToday + 1 : 1;
         const cycleCount = prev.cycleCount + 1;
-        toast.success(`Focus complete · +${COINS_PER_FOCUS} coins`, {
-          description: "Take a well-earned break.",
+        const totalFocus = prev.totalFocusSessions + 1;
+
+        // ---- Coin economy ----
+        let earned = COINS_PER_FOCUS;
+        const bonuses: string[] = [];
+        const streakBonus = STREAK_MILESTONES[streak];
+        if (streakBonus && streak !== prev.streak) {
+          earned += streakBonus;
+          bonuses.push(`+${streakBonus} for ${streak}-day streak`);
+        }
+        if (totalFocus % SESSION_MILESTONE_EVERY === 0) {
+          earned += SESSION_MILESTONE_BONUS;
+          bonuses.push(`+${SESSION_MILESTONE_BONUS} for ${totalFocus} sessions`);
+        }
+
+        const momentumScore = Math.min(100, prev.momentumScore + 3);
+
+        toast.success(`Focus complete · +${earned} coins`, {
+          description: bonuses.length ? bonuses.join(" · ") : "Take a well-earned break.",
         });
         return {
-          coins: prev.coins + COINS_PER_FOCUS,
+          ...prev,
           streak,
           lastCompletedDate: today,
           completedToday,
-          totalFocusSessions: prev.totalFocusSessions + 1,
+          totalFocusSessions: totalFocus,
           cycleCount,
+          momentumScore,
+          coins: prev.coins + earned,
         };
       });
       // auto-switch to break
@@ -201,7 +272,39 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
         return prev;
       });
     } else {
-      toast("Break over", { description: "Ready for another focus session?" });
+      // ---- Long break consequences ----
+      if (completedMode === "long") {
+        setStats((prev) => {
+          const today = todayKey();
+          const sameDay = prev.lastBreakDate === today;
+          const next = sameDay ? prev.longBreaksToday + 1 : 1;
+          let coins = prev.coins;
+          let momentum = prev.momentumScore;
+          if (next > LONG_BREAK_SOFT_CAP) {
+            coins = Math.max(0, prev.coins - OVERRUN_PENALTY);
+            momentum = Math.max(0, prev.momentumScore - 5);
+            const messages = [
+              "That break became a little too long.",
+              "Let's get back into rhythm.",
+              "Small steps still count.",
+            ];
+            toast(messages[Math.floor(Math.random() * messages.length)], {
+              description: `Gentle reset · −${OVERRUN_PENALTY} coins`,
+            });
+          } else {
+            toast("Break over", { description: "Ready for another focus session?" });
+          }
+          return {
+            ...prev,
+            coins,
+            momentumScore: momentum,
+            longBreaksToday: next,
+            lastBreakDate: today,
+          };
+        });
+      } else {
+        toast("Break over", { description: "Ready for another focus session?" });
+      }
       setModeState("focus");
       setRemaining(MODE_MINUTES.focus * 60);
     }
@@ -245,9 +348,43 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     completeSession();
   }, [completeSession]);
 
+  const setCurrentTask = useCallback((task: string | null) => {
+    setStats((prev) => ({ ...prev, currentTask: task && task.trim() ? task.trim() : null }));
+  }, []);
+
+  const setCompanionTheme = useCallback((id: string) => {
+    setStats((prev) =>
+      prev.unlockedThemes.includes(id) ? { ...prev, companionTheme: id } : prev,
+    );
+  }, []);
+
+  const unlockTheme = useCallback((id: string, cost: number) => {
+    let ok = false;
+    setStats((prev) => {
+      if (prev.unlockedThemes.includes(id)) {
+        ok = true;
+        return { ...prev, companionTheme: id };
+      }
+      if (prev.coins < cost) return prev;
+      ok = true;
+      toast.success("Companion unlocked", { description: "A new presence joins you." });
+      return {
+        ...prev,
+        coins: prev.coins - cost,
+        unlockedThemes: [...prev.unlockedThemes, id],
+        companionTheme: id,
+      };
+    });
+    return ok;
+  }, []);
+
   const value = useMemo<Ctx>(
-    () => ({ mode, setMode, remaining, total, running, start, pause, reset, skip, stats, loading }),
-    [mode, setMode, remaining, total, running, start, pause, reset, skip, stats, loading],
+    () => ({
+      mode, setMode, remaining, total, running,
+      start, pause, reset, skip, stats, loading,
+      setCurrentTask, setCompanionTheme, unlockTheme,
+    }),
+    [mode, setMode, remaining, total, running, start, pause, reset, skip, stats, loading, setCurrentTask, setCompanionTheme, unlockTheme],
   );
 
   return <PomodoroCtx.Provider value={value}>{children}</PomodoroCtx.Provider>;

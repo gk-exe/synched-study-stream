@@ -164,34 +164,52 @@ export type Database = {
       user_stats: {
         Row: {
           coins: number
+          companion_theme: string
           completed_today: number
           created_at: string
+          current_task: string | null
           cycle_count: number
+          last_break_date: string | null
           last_completed_date: string | null
+          long_breaks_today: number
+          momentum_score: number
           streak: number
           total_focus_sessions: number
+          unlocked_themes: string[]
           updated_at: string
           user_id: string
         }
         Insert: {
           coins?: number
+          companion_theme?: string
           completed_today?: number
           created_at?: string
+          current_task?: string | null
           cycle_count?: number
+          last_break_date?: string | null
           last_completed_date?: string | null
+          long_breaks_today?: number
+          momentum_score?: number
           streak?: number
           total_focus_sessions?: number
+          unlocked_themes?: string[]
           updated_at?: string
           user_id: string
         }
         Update: {
           coins?: number
+          companion_theme?: string
           completed_today?: number
           created_at?: string
+          current_task?: string | null
           cycle_count?: number
+          last_break_date?: string | null
           last_completed_date?: string | null
+          long_breaks_today?: number
+          momentum_score?: number
           streak?: number
           total_focus_sessions?: number
+          unlocked_themes?: string[]
           updated_at?: string
           user_id?: string
         }
