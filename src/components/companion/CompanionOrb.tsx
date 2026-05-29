@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { getTheme } from "@/lib/companion-themes";
 
 export type OrbState = "idle" | "listening" | "speaking" | "resting";
 
@@ -14,13 +15,16 @@ export type OrbState = "idle" | "listening" | "speaking" | "resting";
 export function CompanionOrb({
   state = "idle",
   size = 200,
+  themeId,
   className,
 }: {
   state?: OrbState;
   size?: number;
+  themeId?: string | null;
   className?: string;
 }) {
   const [blink, setBlink] = useState(false);
+  const theme = getTheme(themeId);
 
   // Natural-feeling blink loop
   useEffect(() => {
@@ -53,10 +57,7 @@ export function CompanionOrb({
       {/* Outer soft halo */}
       <motion.div
         className="absolute inset-0 rounded-full blur-2xl"
-        style={{
-          background:
-            "radial-gradient(circle at 50% 50%, oklch(0.78 0.18 290 / 0.55), oklch(0.72 0.14 230 / 0.25) 55%, transparent 75%)",
-        }}
+        style={{ background: theme.halo }}
         animate={{ opacity: [glowOpacity * 0.7, glowOpacity, glowOpacity * 0.7] }}
         transition={{ duration: breathDuration, repeat: Infinity, ease: "easeInOut" }}
       />
@@ -64,7 +65,8 @@ export function CompanionOrb({
       {/* Listening ring */}
       {state === "listening" && (
         <motion.div
-          className="absolute inset-2 rounded-full border border-primary/40"
+          className="absolute inset-2 rounded-full border"
+          style={{ borderColor: theme.accent }}
           animate={{ scale: [1, 1.08, 1], opacity: [0.4, 0.9, 0.4] }}
           transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -76,8 +78,7 @@ export function CompanionOrb({
         style={{
           width: size * 0.66,
           height: size * 0.66,
-          background:
-            "radial-gradient(circle at 35% 30%, oklch(0.92 0.06 290 / 0.95), oklch(0.72 0.18 290 / 0.95) 55%, oklch(0.55 0.18 290) 100%)",
+          background: theme.body,
         }}
         animate={{ scale: breathScale }}
         transition={{ duration: breathDuration, repeat: Infinity, ease: "easeInOut" }}
