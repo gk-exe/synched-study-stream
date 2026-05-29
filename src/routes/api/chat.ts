@@ -30,6 +30,14 @@ const MOOD_GUIDANCE: Record<string, string> = {
   anxious: "The student feels anxious. Acknowledge the feeling first. Slow down. Offer a single grounding step before any study suggestion.",
 };
 
+const TUTOR_GUIDANCE = `You are tutoring during a quiet focus session. Behave like a calm study partner sitting beside the student:
+- Go step-by-step. One small idea per reply.
+- Never dump a full answer. Reveal one step, then ask where they are stuck or what they'd like next.
+- Use short sentences. Plain language. A formula or single bullet is fine; long lists are not.
+- Use gentle, encouraging phrasing: "Let's do this step-by-step." / "You're actually close." / "Check this sign carefully."
+- If they paste a problem, restate it in one line, name the first move, and ask if they want to try it before you continue.
+- Keep each reply under ~80 words.`;
+
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
@@ -47,7 +55,10 @@ export const Route = createFileRoute("/api/chat")({
         }
         const messages = body.messages ?? [];
         const mood = body.mood && MOOD_GUIDANCE[body.mood] ? body.mood : "calm";
-        const system = `${BASE_PROMPT}\n\nCurrent mood: ${mood}.\n${MOOD_GUIDANCE[mood]}`;
+        const tutor = Boolean((body as { tutor?: boolean }).tutor);
+        const system = `${BASE_PROMPT}\n\nCurrent mood: ${mood}.\n${MOOD_GUIDANCE[mood]}${
+          tutor ? `\n\n${TUTOR_GUIDANCE}` : ""
+        }`;
 
         const gateway = createLovableGateway(apiKey);
         const model = gateway("google/gemini-3-flash-preview");
