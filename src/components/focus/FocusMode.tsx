@@ -45,10 +45,19 @@ export function FocusMode() {
     pause,
     reset,
     skip,
+    stats,
+    setCurrentTask,
   } = usePomodoro();
   const { mood } = useAppData();
   const [panelOpen, setPanelOpen] = useState(false);
   const [input, setInput] = useState("");
+  const [taskInput, setTaskInput] = useState(stats.currentTask ?? "");
+  const [editingTask, setEditingTask] = useState(false);
+
+  // Keep local input in sync when stats hydrate from cloud
+  useEffect(() => {
+    if (!editingTask) setTaskInput(stats.currentTask ?? "");
+  }, [stats.currentTask, editingTask]);
 
   const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
   const ss = String(remaining % 60).padStart(2, "0");
@@ -138,6 +147,45 @@ export function FocusMode() {
             ))}
           </div>
 
+          {/* Current task — persistent across sessions */}
+          <div className="mb-6 w-full max-w-md">
+            {editingTask || !stats.currentTask ? (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setCurrentTask(taskInput);
+                  setEditingTask(false);
+                }}
+                className="glass flex items-center gap-2 rounded-full p-1.5"
+              >
+                <input
+                  value={taskInput}
+                  onChange={(e) => setTaskInput(e.target.value)}
+                  placeholder="What are you working on?"
+                  autoFocus={editingTask}
+                  className="flex-1 bg-transparent px-4 py-1.5 text-sm outline-none placeholder:text-muted-foreground"
+                />
+                <Button
+                  type="submit"
+                  size="sm"
+                  variant="ghost"
+                  className="rounded-full text-xs"
+                >
+                  Set
+                </Button>
+              </form>
+            ) : (
+              <button
+                onClick={() => setEditingTask(true)}
+                className="glass flex w-full items-center justify-between rounded-full px-4 py-2 text-left text-sm"
+              >
+                <span className="text-muted-foreground">Studying</span>
+                <span className="mx-2 truncate font-medium">{stats.currentTask}</span>
+                <span className="text-[11px] text-muted-foreground hover:text-foreground">Edit</span>
+              </button>
+            )}
+          </div>
+
           {/* Orb + ring */}
           <div className="relative grid place-items-center">
             <svg width="260" height="260" className="-rotate-90">
@@ -170,7 +218,7 @@ export function FocusMode() {
               </defs>
             </svg>
             <div className="absolute">
-              <CompanionOrb state={orbState} size={180} />
+              <CompanionOrb state={orbState} themeId={stats.companionTheme} size={180} />
             </div>
           </div>
 
