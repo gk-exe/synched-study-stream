@@ -23,6 +23,7 @@ export function CompanionPresence() {
   // Hide on the full chat page and auth/onboarding flows
   const hidden =
     pathname.startsWith("/companion") ||
+    pathname.startsWith("/focus") ||
     pathname.startsWith("/login") ||
     pathname.startsWith("/signup") ||
     pathname.startsWith("/onboarding") ||
