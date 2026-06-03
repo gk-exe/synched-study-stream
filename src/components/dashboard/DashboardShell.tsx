@@ -10,6 +10,7 @@ import {
   Sun,
   Bell,
   Palette,
+  BookOpen,
 } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import { CompanionPresence } from "@/components/companion/CompanionPresence";
 const nav = [
   { label: "Overview", to: "/dashboard", icon: LayoutDashboard },
   { label: "Focus", to: "/focus", icon: Timer },
+  { label: "Library", to: "/library", icon: BookOpen },
   { label: "Goals", to: "/goals", icon: Target },
   { label: "Analytics", to: "/analytics", icon: BarChart3 },
   { label: "Companion", to: "/companion", icon: Sparkles },
@@ -30,7 +32,8 @@ const nav = [
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { theme, toggle } = useTheme();
   const pathname = useRouterState({ select: (r) => r.location.pathname });
-  const isActive = (to: string) => pathname === to;
+  const isActive = (to: string) =>
+    to === "/library" ? pathname.startsWith("/library") : pathname === to;
   const { loading: dataLoading } = useAppData();
   const { loading: statsLoading } = usePomodoro();
   const syncing = dataLoading || statsLoading;
