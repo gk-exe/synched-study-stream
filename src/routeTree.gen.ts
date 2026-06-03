@@ -20,6 +20,7 @@ import { Route as CustomizeRouteImport } from './routes/customize'
 import { Route as CompanionRouteImport } from './routes/companion'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LibraryPdfsRouteImport } from './routes/library.pdfs'
 import { Route as LibraryNotesRouteImport } from './routes/library.notes'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
@@ -78,6 +79,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LibraryPdfsRoute = LibraryPdfsRouteImport.update({
+  id: '/pdfs',
+  path: '/pdfs',
+  getParentRoute: () => LibraryRoute,
+} as any)
 const LibraryNotesRoute = LibraryNotesRouteImport.update({
   id: '/notes',
   path: '/notes',
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/api/chat': typeof ApiChatRoute
   '/library/notes': typeof LibraryNotesRoute
+  '/library/pdfs': typeof LibraryPdfsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/api/chat': typeof ApiChatRoute
   '/library/notes': typeof LibraryNotesRoute
+  '/library/pdfs': typeof LibraryPdfsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/api/chat': typeof ApiChatRoute
   '/library/notes': typeof LibraryNotesRoute
+  '/library/pdfs': typeof LibraryPdfsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/api/chat'
     | '/library/notes'
+    | '/library/pdfs'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/api/chat'
     | '/library/notes'
+    | '/library/pdfs'
   id:
     | '__root__'
     | '/'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/api/chat'
     | '/library/notes'
+    | '/library/pdfs'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -277,6 +289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/library/pdfs': {
+      id: '/library/pdfs'
+      path: '/pdfs'
+      fullPath: '/library/pdfs'
+      preLoaderRoute: typeof LibraryPdfsRouteImport
+      parentRoute: typeof LibraryRoute
+    }
     '/library/notes': {
       id: '/library/notes'
       path: '/notes'
@@ -296,10 +315,12 @@ declare module '@tanstack/react-router' {
 
 interface LibraryRouteChildren {
   LibraryNotesRoute: typeof LibraryNotesRoute
+  LibraryPdfsRoute: typeof LibraryPdfsRoute
 }
 
 const LibraryRouteChildren: LibraryRouteChildren = {
   LibraryNotesRoute: LibraryNotesRoute,
+  LibraryPdfsRoute: LibraryPdfsRoute,
 }
 
 const LibraryRouteWithChildren =
