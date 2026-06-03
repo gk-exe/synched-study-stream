@@ -3,7 +3,13 @@ import { BookOpen, FileText, Files, Layers, ListChecks, Bookmark, FolderHeart } 
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { cn } from "@/lib/utils";
 
-export const LIBRARY_SECTIONS = [
+type LibrarySection = {
+  to: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  exact?: boolean;
+};
+export const LIBRARY_SECTIONS: LibrarySection[] = [
   { to: "/library", label: "Hub", icon: BookOpen, exact: true },
   { to: "/library/notes", label: "Notes", icon: FileText },
   { to: "/library/pdfs", label: "PDFs", icon: Files },
@@ -11,7 +17,7 @@ export const LIBRARY_SECTIONS = [
   { to: "/library/quizzes", label: "Quizzes", icon: ListChecks },
   { to: "/library/explanations", label: "Explanations", icon: Bookmark },
   { to: "/library/collections", label: "Collections", icon: FolderHeart },
-] as const;
+];
 
 export function LibraryLayout({
   title,
