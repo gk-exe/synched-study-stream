@@ -20,6 +20,7 @@ import { Route as CustomizeRouteImport } from './routes/customize'
 import { Route as CompanionRouteImport } from './routes/companion'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LibraryQuizzesRouteImport } from './routes/library.quizzes'
 import { Route as LibraryPdfsRouteImport } from './routes/library.pdfs'
 import { Route as LibraryNotesRouteImport } from './routes/library.notes'
 import { Route as LibraryFlashcardsRouteImport } from './routes/library.flashcards'
@@ -80,6 +81,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LibraryQuizzesRoute = LibraryQuizzesRouteImport.update({
+  id: '/quizzes',
+  path: '/quizzes',
+  getParentRoute: () => LibraryRoute,
+} as any)
 const LibraryPdfsRoute = LibraryPdfsRouteImport.update({
   id: '/pdfs',
   path: '/pdfs',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/library/flashcards': typeof LibraryFlashcardsRoute
   '/library/notes': typeof LibraryNotesRoute
   '/library/pdfs': typeof LibraryPdfsRoute
+  '/library/quizzes': typeof LibraryQuizzesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/library/flashcards': typeof LibraryFlashcardsRoute
   '/library/notes': typeof LibraryNotesRoute
   '/library/pdfs': typeof LibraryPdfsRoute
+  '/library/quizzes': typeof LibraryQuizzesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/library/flashcards': typeof LibraryFlashcardsRoute
   '/library/notes': typeof LibraryNotesRoute
   '/library/pdfs': typeof LibraryPdfsRoute
+  '/library/quizzes': typeof LibraryQuizzesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/library/flashcards'
     | '/library/notes'
     | '/library/pdfs'
+    | '/library/quizzes'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/library/flashcards'
     | '/library/notes'
     | '/library/pdfs'
+    | '/library/quizzes'
   id:
     | '__root__'
     | '/'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/library/flashcards'
     | '/library/notes'
     | '/library/pdfs'
+    | '/library/quizzes'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -301,6 +313,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/library/quizzes': {
+      id: '/library/quizzes'
+      path: '/quizzes'
+      fullPath: '/library/quizzes'
+      preLoaderRoute: typeof LibraryQuizzesRouteImport
+      parentRoute: typeof LibraryRoute
+    }
     '/library/pdfs': {
       id: '/library/pdfs'
       path: '/pdfs'
@@ -336,12 +355,14 @@ interface LibraryRouteChildren {
   LibraryFlashcardsRoute: typeof LibraryFlashcardsRoute
   LibraryNotesRoute: typeof LibraryNotesRoute
   LibraryPdfsRoute: typeof LibraryPdfsRoute
+  LibraryQuizzesRoute: typeof LibraryQuizzesRoute
 }
 
 const LibraryRouteChildren: LibraryRouteChildren = {
   LibraryFlashcardsRoute: LibraryFlashcardsRoute,
   LibraryNotesRoute: LibraryNotesRoute,
   LibraryPdfsRoute: LibraryPdfsRoute,
+  LibraryQuizzesRoute: LibraryQuizzesRoute,
 }
 
 const LibraryRouteWithChildren =
