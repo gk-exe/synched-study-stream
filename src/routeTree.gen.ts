@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LibraryRouteImport } from './routes/library'
 import { Route as GoalsRouteImport } from './routes/goals'
 import { Route as FocusRouteImport } from './routes/focus'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -19,6 +20,12 @@ import { Route as CustomizeRouteImport } from './routes/customize'
 import { Route as CompanionRouteImport } from './routes/companion'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LibraryQuizzesRouteImport } from './routes/library.quizzes'
+import { Route as LibraryPdfsRouteImport } from './routes/library.pdfs'
+import { Route as LibraryNotesRouteImport } from './routes/library.notes'
+import { Route as LibraryFlashcardsRouteImport } from './routes/library.flashcards'
+import { Route as LibraryExplanationsRouteImport } from './routes/library.explanations'
+import { Route as LibraryCollectionsRouteImport } from './routes/library.collections'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
 const SignupRoute = SignupRouteImport.update({
@@ -34,6 +41,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GoalsRoute = GoalsRouteImport.update({
@@ -71,6 +83,36 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LibraryQuizzesRoute = LibraryQuizzesRouteImport.update({
+  id: '/quizzes',
+  path: '/quizzes',
+  getParentRoute: () => LibraryRoute,
+} as any)
+const LibraryPdfsRoute = LibraryPdfsRouteImport.update({
+  id: '/pdfs',
+  path: '/pdfs',
+  getParentRoute: () => LibraryRoute,
+} as any)
+const LibraryNotesRoute = LibraryNotesRouteImport.update({
+  id: '/notes',
+  path: '/notes',
+  getParentRoute: () => LibraryRoute,
+} as any)
+const LibraryFlashcardsRoute = LibraryFlashcardsRouteImport.update({
+  id: '/flashcards',
+  path: '/flashcards',
+  getParentRoute: () => LibraryRoute,
+} as any)
+const LibraryExplanationsRoute = LibraryExplanationsRouteImport.update({
+  id: '/explanations',
+  path: '/explanations',
+  getParentRoute: () => LibraryRoute,
+} as any)
+const LibraryCollectionsRoute = LibraryCollectionsRouteImport.update({
+  id: '/collections',
+  path: '/collections',
+  getParentRoute: () => LibraryRoute,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -85,10 +127,17 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/focus': typeof FocusRoute
   '/goals': typeof GoalsRoute
+  '/library': typeof LibraryRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/api/chat': typeof ApiChatRoute
+  '/library/collections': typeof LibraryCollectionsRoute
+  '/library/explanations': typeof LibraryExplanationsRoute
+  '/library/flashcards': typeof LibraryFlashcardsRoute
+  '/library/notes': typeof LibraryNotesRoute
+  '/library/pdfs': typeof LibraryPdfsRoute
+  '/library/quizzes': typeof LibraryQuizzesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -98,10 +147,17 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/focus': typeof FocusRoute
   '/goals': typeof GoalsRoute
+  '/library': typeof LibraryRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/api/chat': typeof ApiChatRoute
+  '/library/collections': typeof LibraryCollectionsRoute
+  '/library/explanations': typeof LibraryExplanationsRoute
+  '/library/flashcards': typeof LibraryFlashcardsRoute
+  '/library/notes': typeof LibraryNotesRoute
+  '/library/pdfs': typeof LibraryPdfsRoute
+  '/library/quizzes': typeof LibraryQuizzesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -112,10 +168,17 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/focus': typeof FocusRoute
   '/goals': typeof GoalsRoute
+  '/library': typeof LibraryRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/api/chat': typeof ApiChatRoute
+  '/library/collections': typeof LibraryCollectionsRoute
+  '/library/explanations': typeof LibraryExplanationsRoute
+  '/library/flashcards': typeof LibraryFlashcardsRoute
+  '/library/notes': typeof LibraryNotesRoute
+  '/library/pdfs': typeof LibraryPdfsRoute
+  '/library/quizzes': typeof LibraryQuizzesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,10 +190,17 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/focus'
     | '/goals'
+    | '/library'
     | '/login'
     | '/onboarding'
     | '/signup'
     | '/api/chat'
+    | '/library/collections'
+    | '/library/explanations'
+    | '/library/flashcards'
+    | '/library/notes'
+    | '/library/pdfs'
+    | '/library/quizzes'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -140,10 +210,17 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/focus'
     | '/goals'
+    | '/library'
     | '/login'
     | '/onboarding'
     | '/signup'
     | '/api/chat'
+    | '/library/collections'
+    | '/library/explanations'
+    | '/library/flashcards'
+    | '/library/notes'
+    | '/library/pdfs'
+    | '/library/quizzes'
   id:
     | '__root__'
     | '/'
@@ -153,10 +230,17 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/focus'
     | '/goals'
+    | '/library'
     | '/login'
     | '/onboarding'
     | '/signup'
     | '/api/chat'
+    | '/library/collections'
+    | '/library/explanations'
+    | '/library/flashcards'
+    | '/library/notes'
+    | '/library/pdfs'
+    | '/library/quizzes'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -167,6 +251,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   FocusRoute: typeof FocusRoute
   GoalsRoute: typeof GoalsRoute
+  LibraryRoute: typeof LibraryRouteWithChildren
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   SignupRoute: typeof SignupRoute
@@ -194,6 +279,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/goals': {
@@ -245,6 +337,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/library/quizzes': {
+      id: '/library/quizzes'
+      path: '/quizzes'
+      fullPath: '/library/quizzes'
+      preLoaderRoute: typeof LibraryQuizzesRouteImport
+      parentRoute: typeof LibraryRoute
+    }
+    '/library/pdfs': {
+      id: '/library/pdfs'
+      path: '/pdfs'
+      fullPath: '/library/pdfs'
+      preLoaderRoute: typeof LibraryPdfsRouteImport
+      parentRoute: typeof LibraryRoute
+    }
+    '/library/notes': {
+      id: '/library/notes'
+      path: '/notes'
+      fullPath: '/library/notes'
+      preLoaderRoute: typeof LibraryNotesRouteImport
+      parentRoute: typeof LibraryRoute
+    }
+    '/library/flashcards': {
+      id: '/library/flashcards'
+      path: '/flashcards'
+      fullPath: '/library/flashcards'
+      preLoaderRoute: typeof LibraryFlashcardsRouteImport
+      parentRoute: typeof LibraryRoute
+    }
+    '/library/explanations': {
+      id: '/library/explanations'
+      path: '/explanations'
+      fullPath: '/library/explanations'
+      preLoaderRoute: typeof LibraryExplanationsRouteImport
+      parentRoute: typeof LibraryRoute
+    }
+    '/library/collections': {
+      id: '/library/collections'
+      path: '/collections'
+      fullPath: '/library/collections'
+      preLoaderRoute: typeof LibraryCollectionsRouteImport
+      parentRoute: typeof LibraryRoute
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -255,6 +389,27 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface LibraryRouteChildren {
+  LibraryCollectionsRoute: typeof LibraryCollectionsRoute
+  LibraryExplanationsRoute: typeof LibraryExplanationsRoute
+  LibraryFlashcardsRoute: typeof LibraryFlashcardsRoute
+  LibraryNotesRoute: typeof LibraryNotesRoute
+  LibraryPdfsRoute: typeof LibraryPdfsRoute
+  LibraryQuizzesRoute: typeof LibraryQuizzesRoute
+}
+
+const LibraryRouteChildren: LibraryRouteChildren = {
+  LibraryCollectionsRoute: LibraryCollectionsRoute,
+  LibraryExplanationsRoute: LibraryExplanationsRoute,
+  LibraryFlashcardsRoute: LibraryFlashcardsRoute,
+  LibraryNotesRoute: LibraryNotesRoute,
+  LibraryPdfsRoute: LibraryPdfsRoute,
+  LibraryQuizzesRoute: LibraryQuizzesRoute,
+}
+
+const LibraryRouteWithChildren =
+  LibraryRoute._addFileChildren(LibraryRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
@@ -263,6 +418,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   FocusRoute: FocusRoute,
   GoalsRoute: GoalsRoute,
+  LibraryRoute: LibraryRouteWithChildren,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   SignupRoute: SignupRoute,
