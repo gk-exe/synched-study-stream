@@ -22,6 +22,7 @@ import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LibraryPdfsRouteImport } from './routes/library.pdfs'
 import { Route as LibraryNotesRouteImport } from './routes/library.notes'
+import { Route as LibraryFlashcardsRouteImport } from './routes/library.flashcards'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
 const SignupRoute = SignupRouteImport.update({
@@ -89,6 +90,11 @@ const LibraryNotesRoute = LibraryNotesRouteImport.update({
   path: '/notes',
   getParentRoute: () => LibraryRoute,
 } as any)
+const LibraryFlashcardsRoute = LibraryFlashcardsRouteImport.update({
+  id: '/flashcards',
+  path: '/flashcards',
+  getParentRoute: () => LibraryRoute,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/api/chat': typeof ApiChatRoute
+  '/library/flashcards': typeof LibraryFlashcardsRoute
   '/library/notes': typeof LibraryNotesRoute
   '/library/pdfs': typeof LibraryPdfsRoute
 }
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/api/chat': typeof ApiChatRoute
+  '/library/flashcards': typeof LibraryFlashcardsRoute
   '/library/notes': typeof LibraryNotesRoute
   '/library/pdfs': typeof LibraryPdfsRoute
 }
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/api/chat': typeof ApiChatRoute
+  '/library/flashcards': typeof LibraryFlashcardsRoute
   '/library/notes': typeof LibraryNotesRoute
   '/library/pdfs': typeof LibraryPdfsRoute
 }
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/api/chat'
+    | '/library/flashcards'
     | '/library/notes'
     | '/library/pdfs'
   fileRoutesByTo: FileRoutesByTo
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/api/chat'
+    | '/library/flashcards'
     | '/library/notes'
     | '/library/pdfs'
   id:
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/api/chat'
+    | '/library/flashcards'
     | '/library/notes'
     | '/library/pdfs'
   fileRoutesById: FileRoutesById
@@ -303,6 +315,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LibraryNotesRouteImport
       parentRoute: typeof LibraryRoute
     }
+    '/library/flashcards': {
+      id: '/library/flashcards'
+      path: '/flashcards'
+      fullPath: '/library/flashcards'
+      preLoaderRoute: typeof LibraryFlashcardsRouteImport
+      parentRoute: typeof LibraryRoute
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -314,11 +333,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface LibraryRouteChildren {
+  LibraryFlashcardsRoute: typeof LibraryFlashcardsRoute
   LibraryNotesRoute: typeof LibraryNotesRoute
   LibraryPdfsRoute: typeof LibraryPdfsRoute
 }
 
 const LibraryRouteChildren: LibraryRouteChildren = {
+  LibraryFlashcardsRoute: LibraryFlashcardsRoute,
   LibraryNotesRoute: LibraryNotesRoute,
   LibraryPdfsRoute: LibraryPdfsRoute,
 }
