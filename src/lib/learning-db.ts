@@ -1,16 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
-
-// NOTE: These tables exist in the database (notes, pdfs, flashcard_decks,
-// flashcards, quizzes, quiz_questions, quiz_sessions, saved_explanations,
-// learning_collections, collection_items). They will appear in the generated
-// Supabase types after the next type regeneration; until then we cast through
-// `any` at the query boundary to keep the foundation usable.
-type Db = Database["public"];
-const db = supabase as unknown as ReturnType<typeof getTypedClient>;
-function getTypedClient() {
-  return supabase;
-}
+// NOTE: Learning Hub tables exist in the database; types regenerate later.
+// Until then we cast through `any` at the query boundary.
 
 /* ---------------- Notes ---------------- */
 export type Note = {
