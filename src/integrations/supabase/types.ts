@@ -79,6 +79,332 @@ export type Database = {
           },
         ]
       }
+      companion_catalog: {
+        Row: {
+          base_theme_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_starter: boolean
+          metadata: Json
+          name: string
+          rarity: string
+          slug: string
+          species: string
+          unlock_cost: number
+          updated_at: string
+        }
+        Insert: {
+          base_theme_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_starter?: boolean
+          metadata?: Json
+          name: string
+          rarity?: string
+          slug: string
+          species?: string
+          unlock_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          base_theme_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_starter?: boolean
+          metadata?: Json
+          name?: string
+          rarity?: string
+          slug?: string
+          species?: string
+          unlock_cost?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      companion_concepts: {
+        Row: {
+          adopted_companion_id: string | null
+          created_at: string
+          error: string | null
+          generated_asset_path: string | null
+          id: string
+          inspiration_paths: string[]
+          palette: Json
+          prompt: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          adopted_companion_id?: string | null
+          created_at?: string
+          error?: string | null
+          generated_asset_path?: string | null
+          id?: string
+          inspiration_paths?: string[]
+          palette?: Json
+          prompt?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          adopted_companion_id?: string | null
+          created_at?: string
+          error?: string | null
+          generated_asset_path?: string | null
+          id?: string
+          inspiration_paths?: string[]
+          palette?: Json
+          prompt?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companion_concepts_adopted_companion_id_fkey"
+            columns: ["adopted_companion_id"]
+            isOneToOne: false
+            referencedRelation: "companions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companion_inventory: {
+        Row: {
+          acquired_at: string
+          acquired_via: string
+          equipped_on: string | null
+          id: string
+          is_equipped: boolean
+          item_id: string
+          user_id: string
+        }
+        Insert: {
+          acquired_at?: string
+          acquired_via?: string
+          equipped_on?: string | null
+          id?: string
+          is_equipped?: boolean
+          item_id: string
+          user_id: string
+        }
+        Update: {
+          acquired_at?: string
+          acquired_via?: string
+          equipped_on?: string | null
+          id?: string
+          is_equipped?: boolean
+          item_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companion_inventory_equipped_on_fkey"
+            columns: ["equipped_on"]
+            isOneToOne: false
+            referencedRelation: "companions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "companion_inventory_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "companion_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companion_items: {
+        Row: {
+          cost_coins: number
+          created_at: string
+          description: string | null
+          id: string
+          kind: string
+          name: string
+          preview: Json
+          rarity: string
+          slug: string
+          unlock_rule: Json
+        }
+        Insert: {
+          cost_coins?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          kind: string
+          name: string
+          preview?: Json
+          rarity?: string
+          slug: string
+          unlock_rule?: Json
+        }
+        Update: {
+          cost_coins?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          kind?: string
+          name?: string
+          preview?: Json
+          rarity?: string
+          slug?: string
+          unlock_rule?: Json
+        }
+        Relationships: []
+      }
+      companion_milestones: {
+        Row: {
+          acknowledged: boolean
+          companion_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          reward: Json
+          threshold: number | null
+          user_id: string
+        }
+        Insert: {
+          acknowledged?: boolean
+          companion_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          reward?: Json
+          threshold?: number | null
+          user_id: string
+        }
+        Update: {
+          acknowledged?: boolean
+          companion_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          reward?: Json
+          threshold?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companion_milestones_companion_id_fkey"
+            columns: ["companion_id"]
+            isOneToOne: false
+            referencedRelation: "companions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companion_reactions: {
+        Row: {
+          companion_id: string | null
+          created_at: string
+          id: string
+          intensity: number
+          message: string | null
+          metadata: Json
+          mood: string
+          style: string
+          trigger: string
+          user_id: string
+        }
+        Insert: {
+          companion_id?: string | null
+          created_at?: string
+          id?: string
+          intensity?: number
+          message?: string | null
+          metadata?: Json
+          mood: string
+          style?: string
+          trigger: string
+          user_id: string
+        }
+        Update: {
+          companion_id?: string | null
+          created_at?: string
+          id?: string
+          intensity?: number
+          message?: string | null
+          metadata?: Json
+          mood?: string
+          style?: string
+          trigger?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companion_reactions_companion_id_fkey"
+            columns: ["companion_id"]
+            isOneToOne: false
+            referencedRelation: "companions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companions: {
+        Row: {
+          catalog_id: string
+          created_at: string
+          customization: Json
+          experience: number
+          experience_to_next: number
+          id: string
+          is_active: boolean
+          last_interacted_at: string | null
+          level: number
+          mood: string
+          nickname: string | null
+          unlocked_via: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          catalog_id: string
+          created_at?: string
+          customization?: Json
+          experience?: number
+          experience_to_next?: number
+          id?: string
+          is_active?: boolean
+          last_interacted_at?: string | null
+          level?: number
+          mood?: string
+          nickname?: string | null
+          unlocked_via?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          catalog_id?: string
+          created_at?: string
+          customization?: Json
+          experience?: number
+          experience_to_next?: number
+          id?: string
+          is_active?: boolean
+          last_interacted_at?: string | null
+          level?: number
+          mood?: string
+          nickname?: string | null
+          unlocked_via?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companions_catalog_id_fkey"
+            columns: ["catalog_id"]
+            isOneToOne: false
+            referencedRelation: "companion_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_goals: {
         Row: {
           created_at: string
