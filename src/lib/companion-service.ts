@@ -41,6 +41,7 @@
  */
 
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 
 // ---------------------------------------------------------------------
 // Types
@@ -314,7 +315,7 @@ export async function logMilestone(
     companion_id: companionId,
     kind,
     threshold,
-    reward,
+    reward: reward as Json,
   });
   if (error) throw error;
 }
@@ -439,7 +440,7 @@ export async function recordReaction(userId: string, input: ReactionInput) {
     style: input.style ?? "supportive",
     intensity: input.intensity ?? 1,
     message: input.message ?? null,
-    metadata: input.metadata ?? {},
+    metadata: (input.metadata ?? {}) as Json,
   });
   if (error) throw error;
 
@@ -473,7 +474,7 @@ export async function createConcept(userId: string, draft: ConceptDraft) {
       user_id: userId,
       prompt: draft.prompt ?? null,
       inspiration_paths: draft.inspirationPaths ?? [],
-      palette: draft.palette ?? {},
+      palette: (draft.palette ?? {}) as Json,
       status: "draft",
     })
     .select("*")
