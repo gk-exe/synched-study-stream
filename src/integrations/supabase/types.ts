@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      chapters: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          position: number
+          subject_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+          subject_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+          subject_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapters_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           content: string
@@ -875,6 +913,477 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      subjects: {
+        Row: {
+          color: string | null
+          created_at: string
+          icon: string | null
+          id: string
+          is_system: boolean
+          name: string
+          slug: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_system?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_system?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subtopics: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          position: number
+          topic_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+          topic_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+          topic_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subtopics_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      topics: {
+        Row: {
+          chapter_id: string | null
+          created_at: string
+          difficulty: number
+          id: string
+          mastery: number
+          name: string
+          position: number
+          subject_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          chapter_id?: string | null
+          created_at?: string
+          difficulty?: number
+          id?: string
+          mastery?: number
+          name: string
+          position?: number
+          subject_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          chapter_id?: string | null
+          created_at?: string
+          difficulty?: number
+          id?: string
+          mastery?: number
+          name?: string
+          position?: number
+          subject_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topics_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "topics_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutor_attachments: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          metadata: Json
+          ocr_text: string | null
+          processing_status: string
+          session_id: string
+          source_url: string | null
+          storage_path: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          metadata?: Json
+          ocr_text?: string | null
+          processing_status?: string
+          session_id: string
+          source_url?: string | null
+          storage_path?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          ocr_text?: string | null
+          processing_status?: string
+          session_id?: string
+          source_url?: string | null
+          storage_path?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutor_attachments_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutor_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+          session_id: string | null
+          subject_id: string | null
+          topic_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json
+          session_id?: string | null
+          subject_id?: string | null
+          topic_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          session_id?: string | null
+          subject_id?: string | null
+          topic_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutor_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutor_events_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutor_events_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutor_explanations: {
+        Row: {
+          correction: string | null
+          created_at: string
+          examples: Json
+          formula: string | null
+          id: string
+          is_saved: boolean
+          kind: string
+          mistake: string | null
+          saved_explanation_id: string | null
+          session_id: string | null
+          steps: Json
+          summary: string | null
+          title: string
+          topic_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          correction?: string | null
+          created_at?: string
+          examples?: Json
+          formula?: string | null
+          id?: string
+          is_saved?: boolean
+          kind: string
+          mistake?: string | null
+          saved_explanation_id?: string | null
+          session_id?: string | null
+          steps?: Json
+          summary?: string | null
+          title?: string
+          topic_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          correction?: string | null
+          created_at?: string
+          examples?: Json
+          formula?: string | null
+          id?: string
+          is_saved?: boolean
+          kind?: string
+          mistake?: string | null
+          saved_explanation_id?: string | null
+          session_id?: string | null
+          steps?: Json
+          summary?: string | null
+          title?: string
+          topic_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutor_explanations_saved_explanation_id_fkey"
+            columns: ["saved_explanation_id"]
+            isOneToOne: false
+            referencedRelation: "saved_explanations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutor_explanations_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutor_explanations_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutor_memory: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          kind: string
+          last_seen_at: string
+          updated_at: string
+          user_id: string
+          value: Json
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          kind: string
+          last_seen_at?: string
+          updated_at?: string
+          user_id: string
+          value?: Json
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          kind?: string
+          last_seen_at?: string
+          updated_at?: string
+          user_id?: string
+          value?: Json
+          weight?: number
+        }
+        Relationships: []
+      }
+      tutor_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          kind: string
+          metadata: Json
+          role: string
+          session_id: string
+          step_index: number | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          role: string
+          session_id: string
+          step_index?: number | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          role?: string
+          session_id?: string
+          step_index?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutor_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "tutor_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutor_sessions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          difficulty: number
+          flow: string
+          id: string
+          last_message_at: string | null
+          progress: Json
+          question: string | null
+          status: string
+          subject_id: string | null
+          subtopic_id: string | null
+          tags: string[]
+          title: string
+          topic_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          difficulty?: number
+          flow?: string
+          id?: string
+          last_message_at?: string | null
+          progress?: Json
+          question?: string | null
+          status?: string
+          subject_id?: string | null
+          subtopic_id?: string | null
+          tags?: string[]
+          title?: string
+          topic_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          difficulty?: number
+          flow?: string
+          id?: string
+          last_message_at?: string | null
+          progress?: Json
+          question?: string | null
+          status?: string
+          subject_id?: string | null
+          subtopic_id?: string | null
+          tags?: string[]
+          title?: string
+          topic_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutor_sessions_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutor_sessions_subtopic_id_fkey"
+            columns: ["subtopic_id"]
+            isOneToOne: false
+            referencedRelation: "subtopics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutor_sessions_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_stats: {
         Row: {
