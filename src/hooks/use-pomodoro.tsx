@@ -222,12 +222,15 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
       setStats((prev) => {
         const today = todayKey();
         let streak = prev.streak;
+        let streakTicked = false;
         if (prev.lastCompletedDate === today) {
           // same day, keep streak
         } else if (prev.lastCompletedDate && isYesterday(prev.lastCompletedDate)) {
           streak = prev.streak + 1;
+          streakTicked = true;
         } else {
           streak = 1;
+          streakTicked = prev.streak === 0;
         }
         const completedToday =
           prev.lastCompletedDate === today ? prev.completedToday + 1 : 1;
@@ -252,6 +255,19 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
         toast.success(`Focus complete · +${earned} coins`, {
           description: bonuses.length ? bonuses.join(" · ") : "Take a well-earned break.",
         });
+
+        // Tell the Companion provider a focus session landed so it can
+        // grant XP / level up the active companion. Decoupled via a
+        // window event to keep the two providers from importing each
+        // other (see src/hooks/use-companion.tsx).
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("studysync:focus-completed", {
+              detail: { streakTicked, streak, durationSeconds: completedDuration },
+            }),
+          );
+        }
+
         return {
           ...prev,
           streak,
