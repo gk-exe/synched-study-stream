@@ -9,7 +9,6 @@ import {
   Circle,
   Quote,
   Sparkles,
-  Send,
   TrendingUp,
   Clock,
   BookOpen,
