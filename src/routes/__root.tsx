@@ -14,6 +14,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PomodoroProvider } from "@/hooks/use-pomodoro";
 import { AppDataProvider } from "@/hooks/use-app-data";
+import { CompanionProvider } from "@/hooks/use-companion";
 
 function NotFoundComponent() {
   return (
@@ -126,8 +127,10 @@ function RootComponent() {
         <AuthProvider>
           <AppDataProvider>
             <PomodoroProvider>
-              <Outlet />
-              <Toaster />
+              <CompanionProvider>
+                <Outlet />
+                <Toaster />
+              </CompanionProvider>
             </PomodoroProvider>
           </AppDataProvider>
         </AuthProvider>
