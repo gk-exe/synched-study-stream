@@ -3,17 +3,19 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { Mic, RefreshCw, Send, Sparkles, Square, Trash2 } from "lucide-react";
+import { Bookmark, Mic, RefreshCw, Send, Sparkles, Square, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAppData, type Mood } from "@/hooks/use-app-data";
 import { useAuth } from "@/hooks/use-auth";
+import { useCompanion } from "@/hooks/use-companion";
 import {
   fetchChatHistory,
   insertChatMessage,
   clearChatHistory,
 } from "@/lib/db";
+import { saveExplanation } from "@/lib/learning-db";
 
 const MOOD_PLACEHOLDERS: Record<string, string[]> = {
   calm: [
@@ -64,10 +66,12 @@ function getMessageText(parts: { type: string; text?: string }[]) {
 export function CompanionChat() {
   const { mood, setMood } = useAppData();
   const { user } = useAuth();
+  const { displayName } = useCompanion();
   const [input, setInput] = useState("");
   const [voiceUiActive, setVoiceUiActive] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [initialMessages, setInitialMessages] = useState<UIMessage[] | null>(null);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
 
   // Keep latest mood available to the transport without rebuilding it.
   const moodRef = useRef<Mood>(mood);
@@ -193,6 +197,30 @@ export function CompanionChat() {
     setTimeout(() => setVoiceUiActive(false), 1400);
   };
 
+  // Bridge: any assistant reply can become a saved explanation in the
+  // Learning Hub. This is what makes Tutor ↔ Companion ↔ Library feel
+  // like one workflow rather than three separate features.
+  const handleSaveExplanation = async (message: UIMessage) => {
+    if (!user) {
+      toast("Sign in to save explanations to your library.");
+      return;
+    }
+    const content = getMessageText(message.parts);
+    if (!content.trim()) return;
+    // Use the immediately preceding user message as the source question.
+    const idx = messages.findIndex((m) => m.id === message.id);
+    const prior = idx > 0 ? messages[idx - 1] : null;
+    const source = prior && prior.role === "user" ? getMessageText(prior.parts) : null;
+    const title = source ? source.slice(0, 80) : "Saved from companion";
+    try {
+      await saveExplanation(user.id, { content, source_question: source, title });
+      setSavedIds((s) => new Set(s).add(message.id));
+      toast.success("Saved to your library", { description: "Find it under Explanations." });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't save");
+    }
+  };
+
   return (
     <div className="flex h-[calc(100vh-7rem)] flex-col">
       {/* Header */}
@@ -208,7 +236,7 @@ export function CompanionChat() {
           <span className="absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-background bg-emerald-400" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold">Sync</p>
+          <p className="truncate text-sm font-semibold">{displayName}</p>
           <p className="truncate text-xs text-muted-foreground">
             Your calm, intelligent study companion
           </p>
