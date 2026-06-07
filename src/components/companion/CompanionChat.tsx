@@ -332,6 +332,19 @@ export function CompanionChat() {
                     ) : (
                       <p className="whitespace-pre-wrap">{getMessageText(m.parts)}</p>
                     )}
+                    {m.role === "assistant" && getMessageText(m.parts).length > 24 && (
+                      <div className="mt-2 flex justify-end">
+                        <button
+                          onClick={() => handleSaveExplanation(m)}
+                          disabled={savedIds.has(m.id)}
+                          className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground disabled:opacity-60"
+                          aria-label="Save to library"
+                        >
+                          <Bookmark className="h-3 w-3" />
+                          {savedIds.has(m.id) ? "Saved" : "Save to library"}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </motion.li>
               ))}
