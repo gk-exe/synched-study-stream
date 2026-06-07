@@ -38,6 +38,8 @@ import {
   type PomodoroMode,
 } from "@/hooks/use-pomodoro";
 import { useAppData } from "@/hooks/use-app-data";
+import { useCompanion } from "@/hooks/use-companion";
+import { CompanionOrb } from "@/components/companion/CompanionOrb";
 import { useMemo } from "react";
 import type { DbSession } from "@/lib/db";
 
@@ -321,37 +323,60 @@ export function QuoteCard() {
 
 /* ---------- AI companion preview ---------- */
 export function CompanionCard() {
+  const { companion, displayName, levelProgress, xpForNext } = useCompanion();
+  const { stats } = usePomodoro();
+  const { mood } = useAppData();
+
+  const moodLine: Record<string, string> = {
+    calm: "Resting beside you, ready when you are.",
+    focused: "In the zone with you — let's stay sharp.",
+    tired: "Soft session today. I'll keep it light.",
+    anxious: "Grounded together. One small step.",
+  };
+
   return (
     <CardShell delay={0.25} href="/companion" hrefLabel="Open companion">
-      <div className="flex items-center gap-2">
-        <span className="bg-gradient-brand grid h-8 w-8 place-items-center rounded-xl shadow-glow">
-          <Sparkles className="h-4 w-4 text-primary-foreground" />
-        </span>
-        <div>
-          <p className="text-sm font-semibold">Sync</p>
-          <p className="text-[11px] text-muted-foreground">Your study companion</p>
-        </div>
-        <span className="ml-auto h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-      </div>
-      <div className="mt-4 space-y-2">
-        <div className="bg-foreground/5 max-w-[85%] rounded-2xl rounded-bl-md px-3 py-2 text-sm">
-          Want me to summarize the chapter you just finished?
-        </div>
-        <div className="bg-gradient-brand ml-auto max-w-[80%] rounded-2xl rounded-br-md px-3 py-2 text-sm text-primary-foreground">
-          Yes, in 3 bullets please.
-        </div>
-        <div className="bg-foreground/5 max-w-[90%] rounded-2xl rounded-bl-md px-3 py-2 text-sm">
-          On it — drafting your summary now ✨
+      <div className="flex items-center gap-3">
+        <CompanionOrb themeId={stats.companionTheme} size={64} state="resting" />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="truncate text-sm font-semibold">{displayName}</p>
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Level {companion?.level ?? 1} · {companion?.mood ?? mood}
+          </p>
         </div>
       </div>
-      <div className="glass mt-4 flex items-center gap-2 rounded-2xl px-3 py-2">
-        <input
-          placeholder="Ask Sync anything…"
-          className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-        />
-        <Button size="icon" className="bg-gradient-brand h-7 w-7 rounded-full text-primary-foreground">
-          <Send className="h-3.5 w-3.5" />
-        </Button>
+
+      <p className="mt-4 text-sm leading-snug text-muted-foreground">
+        {moodLine[mood] ?? moodLine.calm}
+      </p>
+
+      <div className="mt-4">
+        <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+          <span>XP</span>
+          <span>
+            {companion?.experience ?? 0} / {xpForNext}
+          </span>
+        </div>
+        <Progress value={levelProgress * 100} className="mt-1.5 h-1.5" />
+      </div>
+
+      <div className="mt-4 flex items-center gap-2">
+        <Link
+          to="/companion"
+          className="bg-gradient-brand inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-primary-foreground shadow-glow"
+        >
+          <Sparkles className="h-3.5 w-3.5" />
+          Talk to {displayName}
+        </Link>
+        <Link
+          to="/customize"
+          className="inline-flex h-8 items-center rounded-full bg-foreground/5 px-3 text-xs text-muted-foreground hover:text-foreground"
+        >
+          Customize
+        </Link>
       </div>
     </CardShell>
   );
