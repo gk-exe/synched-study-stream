@@ -3,6 +3,7 @@ import { LIBRARY_SECTIONS } from "@/components/library/LibraryLayout";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { cn } from "@/lib/utils";
 import { Sparkles } from "lucide-react";
+import { useCompanion } from "@/hooks/use-companion";
 
 export const Route = createFileRoute("/library")({
   component: LibraryRoute,
@@ -19,15 +20,26 @@ function LibraryRoute() {
   // Only render the hub overview when we're exactly at /library.
   // Child routes render via <Outlet />.
   if (pathname !== "/library") return <Outlet />;
+  return <LibraryHub />;
+}
 
+function LibraryHub() {
+  const { displayName } = useCompanion();
   return (
     <DashboardShell>
       <div className="mb-5">
         <p className="text-xs text-muted-foreground">Learning Hub</p>
         <h1 className="text-xl font-semibold tracking-tight">Everything you study, in one calm place</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Notes, PDFs, flashcards, quizzes and the explanations you've saved from Sync.
+          Notes, PDFs, flashcards, quizzes and the explanations you've saved from {displayName}.
         </p>
+        <Link
+          to="/companion"
+          className="bg-gradient-brand mt-3 inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-primary-foreground shadow-glow"
+        >
+          <Sparkles className="h-3.5 w-3.5" />
+          Ask {displayName}
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">

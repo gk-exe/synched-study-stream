@@ -4,6 +4,8 @@ import { Sparkles, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { usePomodoro } from "@/hooks/use-pomodoro";
 import { useAppData } from "@/hooks/use-app-data";
+import { useCompanion } from "@/hooks/use-companion";
+import { CompanionOrb } from "@/components/companion/CompanionOrb";
 import { cn } from "@/lib/utils";
 
 /**
@@ -16,6 +18,7 @@ export function CompanionPresence() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const { mode, running, stats } = usePomodoro();
   const { mood } = useAppData();
+  const { displayName } = useCompanion();
   const [dismissed, setDismissed] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [idx, setIdx] = useState(0);
@@ -97,7 +100,7 @@ export function CompanionPresence() {
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-xs font-medium">Sync</p>
+                <p className="text-xs font-medium">{displayName}</p>
                 <button
                   onClick={() => setDismissed(true)}
                   aria-label="Dismiss"
@@ -123,7 +126,7 @@ export function CompanionPresence() {
                   to="/companion"
                   className="bg-gradient-brand text-primary-foreground inline-flex h-7 items-center rounded-full px-3 text-[11px] font-medium"
                 >
-                  Talk to Sync
+                  Talk to {displayName}
                 </Link>
                 <button
                   onClick={() => setExpanded(false)}
@@ -142,11 +145,15 @@ export function CompanionPresence() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.2 }}
-            aria-label="Open Sync companion"
-            className="bg-gradient-brand shadow-glow relative grid h-12 w-12 place-items-center rounded-full"
+            aria-label={`Open ${displayName} companion`}
+            className="shadow-glow relative grid h-12 w-12 place-items-center rounded-full"
           >
             <span className="bg-primary/40 absolute inset-0 -z-10 animate-ping rounded-full" />
-            <Sparkles className="text-primary-foreground h-5 w-5" />
+            <CompanionOrb
+              themeId={stats.companionTheme}
+              size={48}
+              state={running && mode === "focus" ? "idle" : "resting"}
+            />
           </motion.button>
         )}
       </AnimatePresence>
