@@ -17,6 +17,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAppData } from "@/hooks/use-app-data";
 import { usePomodoro } from "@/hooks/use-pomodoro";
+import { useCompanion } from "@/hooks/use-companion";
+import { CompanionOrb } from "@/components/companion/CompanionOrb";
 import { CompanionPresence } from "@/components/companion/CompanionPresence";
 
 const nav = [
@@ -35,7 +37,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const isActive = (to: string) =>
     to === "/library" ? pathname.startsWith("/library") : pathname === to;
   const { loading: dataLoading } = useAppData();
-  const { loading: statsLoading } = usePomodoro();
+  const { loading: statsLoading, stats } = usePomodoro();
+  const { displayName, companion } = useCompanion();
   const syncing = dataLoading || statsLoading;
 
   return (
@@ -89,10 +92,18 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          <div className="glass rounded-2xl p-4">
-            <p className="text-xs text-muted-foreground">Streak insight</p>
-            <p className="mt-1 text-sm font-medium">You focus best on Wednesdays at 4 PM.</p>
-          </div>
+          <Link
+            to="/companion"
+            className="glass flex items-center gap-3 rounded-2xl p-3 transition-colors hover:bg-foreground/5"
+          >
+            <CompanionOrb themeId={stats.companionTheme} size={44} state="resting" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium">{displayName}</p>
+              <p className="text-[11px] text-muted-foreground">
+                Lvl {companion?.level ?? 1} · {stats.streak}d streak · {stats.coins} coins
+              </p>
+            </div>
+          </Link>
         </aside>
 
         {/* Main content */}
