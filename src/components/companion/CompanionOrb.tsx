@@ -132,8 +132,8 @@ export function CompanionOrb({
         )}
 
         {/* Face */}
-        <div className="relative flex flex-col items-center" style={{ width: "60%" }}>
-          <div className="flex w-[72%] items-center justify-between">
+        <div className="relative flex flex-col items-center" style={{ width: "50%" }}>
+          <div className="flex w-full items-center justify-between">
             <Eye blink={blink} happy={showSmile} />
             <Eye blink={blink} happy={showSmile} />
           </div>
@@ -146,8 +146,8 @@ export function CompanionOrb({
                 animate={{ opacity: 0.85, scaleX: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.35, ease: "easeOut" }}
-                className="mt-[18%] block rounded-b-full border-b-[2px] border-foreground/70"
-                style={{ width: "32%", height: "16%" }}
+                className="mt-[22%] block rounded-b-full border-b-[2px] border-foreground/70"
+                style={{ width: "60%", height: "20%" }}
               />
             )}
           </AnimatePresence>
@@ -192,7 +192,7 @@ function Eye({ blink, happy }: { blink: boolean; happy?: boolean }) {
   return (
     <motion.span
       className="block rounded-full bg-foreground/85"
-      style={{ width: "22%", aspectRatio: "1 / 1", minWidth: 6 }}
+      style={{ width: "42%", aspectRatio: "1 / 1", minWidth: 6 }}
       animate={{ scaleY: blink ? 0.08 : happy ? 0.55 : 1 }}
       transition={{ duration: 0.12, ease: "easeOut" }}
     />
