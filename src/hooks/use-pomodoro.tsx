@@ -384,6 +384,11 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
       if (prev.coins < cost) return prev;
       ok = true;
       toast.success("Companion unlocked", { description: "A new presence joins you." });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("studysync:theme-unlocked", { detail: { id } }),
+        );
+      }
       return {
         ...prev,
         coins: prev.coins - cost,
