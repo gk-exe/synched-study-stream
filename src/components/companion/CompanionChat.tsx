@@ -216,6 +216,11 @@ export function CompanionChat() {
       await saveExplanation(user.id, { content, source_question: source, title });
       setSavedIds((s) => new Set(s).add(message.id));
       toast.success("Saved to your library", { description: "Find it under Explanations." });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("studysync:explanation-saved", { detail: { title } }),
+        );
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't save");
     }

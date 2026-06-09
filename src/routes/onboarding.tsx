@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { ArrowRight, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fetchOnboarded, setCachedOnboarded } from "@/lib/onboarding";
+import { CompanionOrb } from "@/components/companion/CompanionOrb";
 
 export const Route = createFileRoute("/onboarding")({
   component: OnboardingPage,
@@ -106,6 +107,35 @@ function OnboardingInner() {
               <div className="text-xs text-muted-foreground">{s.desc}</div>
             </SelectCard>
           ))}
+        </div>
+      ),
+    },
+    {
+      title: "Meet Sync",
+      sub: "Your calm, ever-present study companion.",
+      valid: true,
+      body: (
+        <div className="flex flex-col items-center text-center">
+          <CompanionOrb size={160} state="celebrate" expression="smile" />
+          <p className="mt-4 max-w-sm text-sm text-muted-foreground">
+            Sync sits quietly beside you as you study. Finish focus sessions to
+            grow together, unlock new presences, and build a streak that
+            actually feels like progress.
+          </p>
+          <ul className="mt-5 grid w-full max-w-sm gap-2 text-left text-sm">
+            <li className="glass rounded-2xl px-3 py-2">
+              🎯 <span className="font-medium">Focus Mode</span> — calm 25-min sessions, gently guided.
+            </li>
+            <li className="glass rounded-2xl px-3 py-2">
+              ✨ <span className="font-medium">Sync grows with you</span> — levels, moods, and rewards.
+            </li>
+            <li className="glass rounded-2xl px-3 py-2">
+              📚 <span className="font-medium">Library</span> — save anything Sync explains for later.
+            </li>
+          </ul>
+          <p className="mt-4 text-xs text-muted-foreground">
+            Come back tomorrow — your streak (and Sync) will be waiting.
+          </p>
         </div>
       ),
     },
