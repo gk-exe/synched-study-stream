@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Check, Coins, Lock, Sparkles } from "lucide-react";
+import { Check, Coins, ImagePlus, Lock, Sparkles, Wand2 } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { CompanionOrb } from "@/components/companion/CompanionOrb";
 import { Button } from "@/components/ui/button";
@@ -89,6 +89,74 @@ function CustomizePage() {
             );
           })}
         </div>
+
+        {/* ----------------------------------------------------------------
+            Personal Companion (foundation only — generation not wired yet).
+            This section is the placeholder UI for the future flow where
+            users can upload inspiration and describe a one-of-one companion.
+            Inputs are disabled so we don't collect data we can't act on.
+        ----------------------------------------------------------------- */}
+        <section className="glass mt-8 rounded-3xl p-6 shadow-glow">
+          <div className="flex items-start gap-3">
+            <span className="bg-gradient-brand grid h-10 w-10 shrink-0 place-items-center rounded-xl shadow-glow">
+              <Wand2 className="text-primary-foreground h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-base font-semibold tracking-tight">
+                  Your own companion
+                </h2>
+                <span className="rounded-full bg-foreground/5 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Coming soon
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Soon you'll be able to shape a one-of-one companion — upload
+                inspiration, describe a vibe, and we'll generate a stylized
+                study partner just for you.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-dashed border-border/70 bg-foreground/[0.02] p-5 text-center">
+              <ImagePlus className="mx-auto h-5 w-5 text-muted-foreground" />
+              <p className="mt-2 text-sm font-medium">Inspiration images</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Drop a mood board to guide the style.
+              </p>
+              <Button
+                disabled
+                variant="outline"
+                className="mt-3 rounded-full opacity-70"
+              >
+                Upload (soon)
+              </Button>
+            </div>
+            <div className="rounded-2xl border border-dashed border-border/70 bg-foreground/[0.02] p-5">
+              <p className="text-sm font-medium">Describe your companion</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                A name, a feeling, a color — anything that fits.
+              </p>
+              <textarea
+                disabled
+                placeholder="e.g. A calm fox with soft moonlight glow, named Luma…"
+                className="mt-3 h-20 w-full resize-none rounded-xl border border-border/70 bg-background/50 p-2.5 text-sm placeholder:text-muted-foreground/70 disabled:opacity-70"
+              />
+              <Button
+                disabled
+                className="bg-gradient-brand mt-3 rounded-full text-primary-foreground opacity-70"
+              >
+                <Sparkles className="h-4 w-4" /> Generate (soon)
+              </Button>
+            </div>
+          </div>
+
+          <p className="mt-4 text-xs text-muted-foreground">
+            Unlocks at <span className="font-medium text-foreground">500 coins</span>{" "}
+            of study earned. Keep showing up — your companion is growing with you.
+          </p>
+        </section>
       </div>
     </DashboardShell>
   );
