@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useAppData, type Mood } from "@/hooks/use-app-data";
 import { useAuth } from "@/hooks/use-auth";
 import { useCompanion } from "@/hooks/use-companion";
+import { usePomodoro } from "@/hooks/use-pomodoro";
 import {
   fetchChatHistory,
   insertChatMessage,
@@ -68,7 +69,7 @@ export function CompanionChat() {
   const { mood, setMood } = useAppData();
   const { user } = useAuth();
   const { displayName } = useCompanion();
-  const { stats } = useAppData();
+  const { stats } = usePomodoro();
   const [input, setInput] = useState("");
   const [voiceUiActive, setVoiceUiActive] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -362,7 +363,7 @@ export function CompanionChat() {
               ))}
             </AnimatePresence>
 
-            {status === "submitted" && <TypingBubble />}
+            {status === "submitted" && <TypingBubble themeId={stats?.companionTheme} />}
 
             {error && !busy && (
               <motion.li
