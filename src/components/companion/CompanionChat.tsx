@@ -521,9 +521,9 @@ function EmptyState({
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="bg-gradient-brand mx-auto grid h-16 w-16 place-items-center rounded-3xl shadow-glow"
+          className="mx-auto"
         >
-          <Sparkles className="h-7 w-7 text-primary-foreground" />
+          <CompanionOrb size={88} state="resting" expression="smile" />
         </motion.div>
         <motion.h2
           initial={{ y: 6, opacity: 0 }}
