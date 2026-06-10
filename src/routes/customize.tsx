@@ -1,6 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Check, Coins, ImagePlus, Lock, Sparkles, Wand2 } from "lucide-react";
+import {
+  Check,
+  Coins,
+  Eye,
+  ImagePlus,
+  Lock,
+  Palette,
+  Shapes,
+  Shirt,
+  Sparkles,
+  Wand2,
+} from "lucide-react";
+import { useState } from "react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { CompanionOrb } from "@/components/companion/CompanionOrb";
 import { Button } from "@/components/ui/button";
@@ -18,19 +30,34 @@ export const Route = createFileRoute("/customize")({
   }),
 });
 
+/**
+ * Customization categories. Only "Themes" and "Custom" render content
+ * today — the rest are intentional placeholders that establish the IA
+ * for future skins / robot silhouettes / eye styles.
+ */
+type CategoryId = "themes" | "skins" | "robots" | "eyes" | "custom";
+const CATEGORIES: { id: CategoryId; label: string; icon: typeof Palette; soon?: boolean }[] = [
+  { id: "themes", label: "Themes", icon: Palette },
+  { id: "skins", label: "Skins", icon: Shirt, soon: true },
+  { id: "robots", label: "Robot styles", icon: Shapes, soon: true },
+  { id: "eyes", label: "Eye styles", icon: Eye, soon: true },
+  { id: "custom", label: "Custom", icon: Wand2 },
+];
+
 function CustomizePage() {
   const { stats, setCompanionTheme, unlockTheme } = usePomodoro();
   const active = stats.companionTheme;
+  const [category, setCategory] = useState<CategoryId>("themes");
 
   return (
     <DashboardShell>
       <div className="mx-auto max-w-3xl">
         <header className="mb-6 flex flex-col items-center text-center">
-          <CompanionOrb themeId={active} size={160} />
-          <p className="mt-4 text-xs text-muted-foreground">Your companion</p>
-          <h1 className="text-xl font-semibold tracking-tight">Choose a presence</h1>
+          <CompanionOrb themeId={active} size={160} expression="smile" />
+          <p className="mt-4 text-xs text-muted-foreground">Sync · your study companion</p>
+          <h1 className="text-xl font-semibold tracking-tight">Shape your companion</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Personalize the atmosphere. Earn coins from focus sessions to unlock more.
+            Personalize Sync's presence. Earn coins from focus sessions to unlock more.
           </p>
           <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-foreground/5 px-3 py-1 text-xs">
             <Coins className="h-3.5 w-3.5 text-amber-500" />
@@ -39,6 +66,38 @@ function CustomizePage() {
           </div>
         </header>
 
+        <div className="mb-5 flex flex-wrap gap-1.5">
+          {CATEGORIES.map((c) => {
+            const Icon = c.icon;
+            const isActive = category === c.id;
+            return (
+              <button
+                key={c.id}
+                onClick={() => setCategory(c.id)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs transition-all",
+                  isActive
+                    ? "bg-gradient-brand text-primary-foreground shadow-glow"
+                    : "glass text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {c.label}
+                {c.soon && (
+                  <span className="rounded-full bg-foreground/10 px-1.5 py-0.5 text-[9px] uppercase tracking-wide">
+                    soon
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {category !== "themes" && category !== "custom" && (
+          <ComingSoonPanel id={category} />
+        )}
+
+        {category === "themes" && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {COMPANION_THEMES.map((theme, i) => {
             const unlocked = stats.unlockedThemes.includes(theme.id);
