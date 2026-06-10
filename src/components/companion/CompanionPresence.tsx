@@ -35,31 +35,31 @@ export function CompanionPresence() {
   const messages = useMemo(() => {
     const base: string[] = [];
     // Milestone & consistency recognition
-    if (stats.streak === 3) base.push("Three days in. The rhythm is building.");
-    if (stats.streak === 7) base.push("A whole week. You showed up — that's real.");
+    if (stats.streak === 3) base.push("Three days in. The rhythm is forming.");
+    if (stats.streak === 7) base.push("A full week. You really showed up.");
     if (stats.streak >= 14 && stats.streak % 7 === 0)
-      base.push(`${stats.streak} days. Consistency like this changes things.`);
+      base.push(`${stats.streak} days. Consistency is doing its work.`);
     if (stats.totalFocusSessions > 0 && stats.totalFocusSessions % 10 === 0)
-      base.push(`${stats.totalFocusSessions} sessions together. Proud of you.`);
-    if (stats.momentumScore >= 80) base.push("You've been really consistent lately.");
-    if (stats.momentumScore <= 30) base.push("Even one small session today would help.");
+      base.push(`${stats.totalFocusSessions} sessions together. Steady progress.`);
+    if (stats.momentumScore >= 80) base.push("You've been consistent lately.");
+    if (stats.momentumScore <= 30) base.push("One small session today is enough.");
 
     if (running && mode === "focus") {
-      base.push("You're in flow — I'm right here with you.");
-      base.push("Keep going. One breath, one line at a time.");
+      base.push("You're in flow. I'm right here.");
+      base.push("Keep going. One line at a time.");
     } else if (running) {
-      base.push("Rest is part of the work. Sip some water.");
-      base.push("Let your mind wander for a moment.");
+      base.push("Rest is part of the work.");
+      base.push("Let your mind wander a moment.");
     } else {
       if (stats.completedToday > 0)
-        base.push(`${stats.completedToday} session${stats.completedToday > 1 ? "s" : ""} today — nice work.`);
+        base.push(`${stats.completedToday} session${stats.completedToday > 1 ? "s" : ""} today. Nice work.`);
       if (stats.streak >= 2)
         base.push(`${stats.streak}-day streak holding steady.`);
       base.push("Ready when you are. No pressure.");
     }
-    if (mood === "tired") base.push("Be gentle with yourself today.");
+    if (mood === "tired") base.push("Be gentle today. Small counts.");
     if (mood === "anxious") base.push("Inhale 4 · hold 4 · exhale 6. I'll wait.");
-    if (mood === "focused") base.push("You've got the room. Go deep.");
+    if (mood === "focused") base.push("The room is yours. Go deep.");
     return base;
   }, [running, mode, mood, stats.completedToday, stats.streak, stats.totalFocusSessions, stats.momentumScore]);
 
@@ -95,9 +95,12 @@ export function CompanionPresence() {
             transition={{ duration: 0.2 }}
             className="glass shadow-glow flex w-[min(78vw,18rem)] items-start gap-3 rounded-2xl p-3"
           >
-            <span className="bg-gradient-brand shadow-glow grid h-9 w-9 shrink-0 place-items-center rounded-xl">
-              <Sparkles className="text-primary-foreground h-4 w-4" />
-            </span>
+            <CompanionOrb
+              themeId={stats.companionTheme}
+              size={40}
+              state="resting"
+              className="shrink-0"
+            />
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-xs font-medium">{displayName}</p>
