@@ -148,14 +148,10 @@ function CustomizePage() {
             );
           })}
         </div>
+        )}
 
-        {/* ----------------------------------------------------------------
-            Personal Companion (foundation only — generation not wired yet).
-            This section is the placeholder UI for the future flow where
-            users can upload inspiration and describe a one-of-one companion.
-            Inputs are disabled so we don't collect data we can't act on.
-        ----------------------------------------------------------------- */}
-        <section className="glass mt-8 rounded-3xl p-6 shadow-glow">
+        {category === "custom" && (
+        <section className="glass rounded-3xl p-6 shadow-glow">
           <div className="flex items-start gap-3">
             <span className="bg-gradient-brand grid h-10 w-10 shrink-0 place-items-center rounded-xl shadow-glow">
               <Wand2 className="text-primary-foreground h-5 w-5" />
@@ -216,7 +212,34 @@ function CustomizePage() {
             of study earned. Keep showing up — your companion is growing with you.
           </p>
         </section>
+        )}
       </div>
     </DashboardShell>
+  );
+}
+
+function ComingSoonPanel({ id }: { id: CategoryId }) {
+  const copy: Record<string, { title: string; desc: string }> = {
+    skins: {
+      title: "Skins",
+      desc: "Outfits and surface materials for Sync — matte, chrome, soft cotton.",
+    },
+    robots: {
+      title: "Robot styles",
+      desc: "Alternate silhouettes for Sync — antenna shapes, posture, frame.",
+    },
+    eyes: {
+      title: "Eye styles",
+      desc: "Different glows and shapes for Sync's eyes — round, pixel, crescent.",
+    },
+  };
+  const c = copy[id] ?? { title: "Coming soon", desc: "More ways to shape Sync are on the way." };
+  return (
+    <div className="glass rounded-3xl p-8 text-center shadow-glow">
+      <CompanionOrb size={96} state="resting" className="mx-auto" />
+      <h2 className="mt-4 text-base font-semibold tracking-tight">{c.title}</h2>
+      <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">{c.desc}</p>
+      <p className="mt-3 text-xs text-muted-foreground">In the works — Sync is growing with you.</p>
+    </div>
   );
 }
