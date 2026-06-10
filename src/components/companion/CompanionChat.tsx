@@ -3,7 +3,8 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { Bookmark, Mic, RefreshCw, Send, Sparkles, Square, Trash2 } from "lucide-react";
+import { Bookmark, Mic, RefreshCw, Send, Square, Trash2 } from "lucide-react";
+import { CompanionOrb } from "@/components/companion/CompanionOrb";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -67,6 +68,7 @@ export function CompanionChat() {
   const { mood, setMood } = useAppData();
   const { user } = useAuth();
   const { displayName } = useCompanion();
+  const { stats } = useAppData();
   const [input, setInput] = useState("");
   const [voiceUiActive, setVoiceUiActive] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -235,15 +237,17 @@ export function CompanionChat() {
         className="glass mb-4 flex items-center gap-3 rounded-3xl p-4 shadow-glow"
       >
         <div className="relative">
-          <span className="bg-gradient-brand grid h-12 w-12 place-items-center rounded-2xl shadow-glow">
-            <Sparkles className="h-5 w-5 text-primary-foreground" />
-          </span>
+          <CompanionOrb
+            size={52}
+            state={busy ? "speaking" : "resting"}
+            themeId={stats?.companionTheme}
+          />
           <span className="absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-background bg-emerald-400" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">{displayName}</p>
           <p className="truncate text-xs text-muted-foreground">
-            Your calm, intelligent study companion
+            Your calm study partner
           </p>
         </div>
         <div className="hidden gap-1 sm:flex">
@@ -318,9 +322,12 @@ export function CompanionChat() {
                   )}
                 >
                   {m.role === "assistant" && (
-                    <span className="bg-gradient-brand mt-1 grid h-8 w-8 shrink-0 place-items-center rounded-xl shadow-glow">
-                      <Sparkles className="h-4 w-4 text-primary-foreground" />
-                    </span>
+                    <CompanionOrb
+                      size={36}
+                      state="resting"
+                      themeId={stats?.companionTheme}
+                      className="mt-1 shrink-0"
+                    />
                   )}
                   <div
                     className={cn(
@@ -452,16 +459,14 @@ export function CompanionChat() {
   );
 }
 
-function TypingBubble() {
+function TypingBubble({ themeId }: { themeId?: string | null }) {
   return (
     <motion.li
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       className="flex gap-3"
     >
-      <span className="bg-gradient-brand mt-1 grid h-8 w-8 shrink-0 place-items-center rounded-xl shadow-glow">
-        <Sparkles className="h-4 w-4 text-primary-foreground" />
-      </span>
+      <CompanionOrb size={36} state="speaking" themeId={themeId} className="mt-1 shrink-0" />
       <div className="bg-foreground/5 flex items-center gap-1.5 rounded-2xl rounded-bl-md px-4 py-3">
         {[0, 1, 2].map((i) => (
           <motion.span
