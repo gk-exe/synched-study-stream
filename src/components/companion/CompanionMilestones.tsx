@@ -54,28 +54,35 @@ export function CompanionMilestones() {
       const s = statsRef.current;
       // Streak milestones first — they're the most meaningful moments.
       if (detail.streakTicked && detail.streak === 3)
-        return say("Three days in a row.", `${nameRef.current} · the rhythm is forming`);
+        return say("Three days in a row.", `${nameRef.current} · the rhythm is forming.`);
       if (detail.streakTicked && detail.streak === 7)
-        return say("A full week together.", `${nameRef.current} · you really showed up`);
+        return say("A full week. You really showed up.", nameRef.current);
       if (detail.streakTicked && detail.streak && detail.streak % 14 === 0)
-        return say(`${detail.streak} days strong.`, `${nameRef.current} · this is who you're becoming`);
+        return say(`${detail.streak} days strong.`, `${nameRef.current} · this is who you're becoming.`);
       // Session totals
       const total = (s.totalFocusSessions ?? 0);
       if (total > 0 && total % 25 === 0)
-        return say(`${total} sessions together.`, `${nameRef.current} · proud of you`);
+        return say(`${total} sessions together.`, `${nameRef.current} · steady progress.`);
       if (total > 0 && total % 10 === 0)
-        return say("You're building momentum.", nameRef.current);
+        return say("Momentum is building.", nameRef.current);
       // Plain session — keep it gentle and rotate copy
       if ((s.completedToday ?? 0) >= 3)
-        return say(pick(["Strong day.", "You're getting stronger at this.", "That's three today."]), nameRef.current);
-      say(pick(["Nice work today.", "That was a solid session.", "Good — one more brick laid."]), nameRef.current);
+        return say(pick(["Strong day.", "You're getting closer.", "That's three today."]), nameRef.current);
+      say(
+        pick([
+          "Nice work.",
+          "That was a solid study session.",
+          "You're making progress.",
+        ]),
+        nameRef.current,
+      );
     };
 
     const onSaved = () =>
       say(
         pick([
-          "Saved. We can come back to that.",
-          "Good catch — kept it for later.",
+          "Saved. We can come back to it.",
+          "Kept for later.",
           "Tucked into your library.",
         ]),
         nameRef.current,
@@ -85,7 +92,7 @@ export function CompanionMilestones() {
       const detail = (e as CustomEvent<{ title?: string }>).detail ?? {};
       say(
         detail.title ? `Done: ${detail.title}.` : "Goal complete.",
-        `${nameRef.current} · that's progress you can feel`,
+        `${nameRef.current} · that's progress you can feel.`,
       );
     };
 
@@ -93,7 +100,7 @@ export function CompanionMilestones() {
       const detail = (e as CustomEvent<{ name?: string }>).detail ?? {};
       say(
         detail.name ? `${detail.name} is yours.` : "A new presence joins you.",
-        `${nameRef.current} · we grow together`,
+        `${nameRef.current} · we grow together.`,
       );
     };
 
