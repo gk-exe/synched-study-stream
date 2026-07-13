@@ -19,12 +19,9 @@ import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useCompanion } from "@/hooks/use-companion";
 import { usePomodoro } from "@/hooks/use-pomodoro";
+import { pickLine, type LineTag } from "@/lib/companion-lines";
 
 const COOLDOWN_MS = 12_000;
-
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
 
 export function CompanionMilestones() {
   const { displayName } = useCompanion();
@@ -52,41 +49,36 @@ export function CompanionMilestones() {
     const onFocusDone = (e: Event) => {
       const detail = (e as CustomEvent<{ streakTicked?: boolean; streak?: number }>).detail ?? {};
       const s = statsRef.current;
-      // Streak milestones first — they're the most meaningful moments.
-      if (detail.streakTicked && detail.streak === 3)
-        return say("Three days in a row.", `${nameRef.current} · the rhythm is forming.`);
-      if (detail.streakTicked && detail.streak === 7)
-        return say("A full week. You really showed up.", nameRef.current);
-      if (detail.streakTicked && detail.streak && detail.streak % 14 === 0)
-        return say(`${detail.streak} days strong.`, `${nameRef.current} · this is who you're becoming.`);
-      // Session totals
-      const total = (s.totalFocusSessions ?? 0);
-      if (total > 0 && total % 25 === 0)
-        return say(`${total} sessions together.`, `${nameRef.current} · steady progress.`);
-      if (total > 0 && total % 10 === 0)
-        return say("Momentum is building.", nameRef.current);
-      // Plain session — keep it gentle and rotate copy
-      if ((s.completedToday ?? 0) >= 3)
-        return say(pick(["Strong day.", "You're getting closer.", "That's three today."]), nameRef.current);
-      say(
-        pick([
-          "Nice work.",
-          "That was a solid study session.",
-          "You're making progress.",
-        ]),
-        nameRef.current,
-      );
+      const total = s.totalFocusSessions ?? 0;
+      const hour = new Date().getHours();
+      const tags: LineTag[] = [];
+
+      // Priority 1: streak ticks — the most meaningful moments.
+      if (detail.streakTicked) {
+        if (detail.streak === 3) tags.push("streak.3");
+        else if (detail.streak === 7) tags.push("streak.7");
+        else if (detail.streak === 14) tags.push("streak.14");
+        else if (detail.streak === 30) tags.push("streak.30");
+        else if (detail.streak && detail.streak % 7 === 0) tags.push("streak.milestone");
+        else if (detail.streak === 1) tags.push("streak.new");
+      }
+
+      // Priority 2: cumulative session milestones.
+      if (total === 100) tags.push("sessions.100");
+      else if (total === 50) tags.push("sessions.50");
+      else if (total > 0 && total % 25 === 0) tags.push("sessions.25");
+      else if (total > 0 && total % 10 === 0) tags.push("sessions.10");
+
+      // Priority 3: contextual encouragement for the plain case.
+      if (hour >= 22 || hour < 5) tags.push("focus.done.late");
+      if ((s.completedToday ?? 0) === 1) tags.push("focus.done.first");
+      if ((s.completedToday ?? 0) >= 3) tags.push("focus.done.strong");
+      tags.push("focus.done.small");
+
+      say(pickLine(tags), nameRef.current);
     };
 
-    const onSaved = () =>
-      say(
-        pick([
-          "Saved. We can come back to it.",
-          "Kept for later.",
-          "Tucked into your library.",
-        ]),
-        nameRef.current,
-      );
+    const onSaved = () => say(pickLine(["saved"]), nameRef.current);
 
     const onGoal = (e: Event) => {
       const detail = (e as CustomEvent<{ title?: string }>).detail ?? {};
