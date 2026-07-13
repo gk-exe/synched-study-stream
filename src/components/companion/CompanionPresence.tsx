@@ -7,6 +7,7 @@ import { useAppData } from "@/hooks/use-app-data";
 import { useCompanion } from "@/hooks/use-companion";
 import { CompanionOrb } from "@/components/companion/CompanionOrb";
 import { cn } from "@/lib/utils";
+import { collectLines, timeOfDayTag, type LineTag } from "@/lib/companion-lines";
 
 /**
  * A small persistent "Sync" presence shown across the app.
@@ -33,34 +34,30 @@ export function CompanionPresence() {
     pathname === "/";
 
   const messages = useMemo(() => {
-    const base: string[] = [];
-    // Milestone & consistency recognition
-    if (stats.streak === 3) base.push("Three days in. The rhythm is forming.");
-    if (stats.streak === 7) base.push("A full week. You really showed up.");
-    if (stats.streak >= 14 && stats.streak % 7 === 0)
-      base.push(`${stats.streak} days. Consistency is doing its work.`);
-    if (stats.totalFocusSessions > 0 && stats.totalFocusSessions % 10 === 0)
-      base.push(`${stats.totalFocusSessions} sessions together. Steady progress.`);
-    if (stats.momentumScore >= 80) base.push("You've been consistent lately.");
-    if (stats.momentumScore <= 30) base.push("One small session today is enough.");
-
-    if (running && mode === "focus") {
-      base.push("You're in flow. I'm right here.");
-      base.push("Keep going. One line at a time.");
-    } else if (running) {
-      base.push("Rest is part of the work.");
-      base.push("Let your mind wander a moment.");
-    } else {
-      if (stats.completedToday > 0)
-        base.push(`${stats.completedToday} session${stats.completedToday > 1 ? "s" : ""} today. Nice work.`);
-      if (stats.streak >= 2)
-        base.push(`${stats.streak}-day streak holding steady.`);
-      base.push("Ready when you are. No pressure.");
-    }
-    if (mood === "tired") base.push("Be gentle today. Small counts.");
-    if (mood === "anxious") base.push("Inhale 4 · hold 4 · exhale 6. I'll wait.");
-    if (mood === "focused") base.push("The room is yours. Go deep.");
-    return base;
+    const tags: LineTag[] = [];
+    // Mood always leads if it's non-neutral — it's the most personal signal.
+    if (mood === "tired") tags.push("mood.tired");
+    if (mood === "anxious") tags.push("mood.anxious");
+    if (mood === "focused") tags.push("mood.focused");
+    // Session state
+    if (running && mode === "focus") tags.push("flow.focus");
+    else if (running) tags.push("flow.break");
+    // Momentum
+    if (stats.momentumScore >= 80) tags.push("momentum.high");
+    if (stats.momentumScore <= 30) tags.push("momentum.low");
+    // Time-of-day only when idle
+    if (!running) tags.push(timeOfDayTag());
+    tags.push("idle.default");
+    // Prefix live stats as their own dynamic lines so they still surface,
+    // but the pool below carries the emotional variety.
+    const dynamic: string[] = [];
+    if (!running && stats.completedToday > 0)
+      dynamic.push(
+        `${stats.completedToday} session${stats.completedToday > 1 ? "s" : ""} today. Nice work.`,
+      );
+    if (!running && stats.streak >= 2)
+      dynamic.push(`${stats.streak}-day streak holding steady.`);
+    return [...dynamic, ...collectLines(tags)];
   }, [running, mode, mood, stats.completedToday, stats.streak, stats.totalFocusSessions, stats.momentumScore]);
 
   useEffect(() => {
