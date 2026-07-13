@@ -53,6 +53,18 @@ export function FocusMode() {
   const [input, setInput] = useState("");
   const [taskInput, setTaskInput] = useState(stats.currentTask ?? "");
   const [editingTask, setEditingTask] = useState(false);
+  const [justCompleted, setJustCompleted] = useState(false);
+  const prevRemainingRef = useRef(remaining);
+
+  // Detect a session boundary (remaining fell to 0) and flash celebrate.
+  useEffect(() => {
+    if (prevRemainingRef.current > 0 && remaining === 0) {
+      setJustCompleted(true);
+      const t = setTimeout(() => setJustCompleted(false), 2600);
+      return () => clearTimeout(t);
+    }
+    prevRemainingRef.current = remaining;
+  }, [remaining]);
 
   // Keep local input in sync when stats hydrate from cloud
   useEffect(() => {
@@ -90,11 +102,13 @@ export function FocusMode() {
 
   const orbState: OrbState = busy
     ? "speaking"
-    : panelOpen
-      ? "listening"
-      : running && mode === "focus"
-        ? "idle"
-        : "resting";
+    : justCompleted
+      ? "celebrate"
+      : panelOpen
+        ? "listening"
+        : running && mode === "focus"
+          ? "idle"
+          : "resting";
 
   const handleAsk = (text?: string) => {
     const value = (text ?? input).trim();
@@ -112,14 +126,52 @@ export function FocusMode() {
 
   return (
     <div className="relative -mt-2">
-      {/* Ambient gradient backdrop */}
-      <div
-        className="pointer-events-none fixed inset-0 -z-10 opacity-70"
+      {/* Ambient gradient backdrop — breathes gently while running. */}
+      <motion.div
+        className="pointer-events-none fixed inset-0 -z-10"
+        animate={{
+          opacity: running ? [0.55, 0.9, 0.55] : 0.55,
+        }}
+        transition={{
+          duration: mode === "focus" ? 8 : 6,
+          repeat: running ? Infinity : 0,
+          ease: "easeInOut",
+        }}
         style={{
           background:
-            "radial-gradient(60% 50% at 50% 30%, oklch(0.72 0.18 290 / 0.18), transparent 70%), radial-gradient(50% 40% at 70% 80%, oklch(0.72 0.14 230 / 0.15), transparent 70%)",
+            mode === "focus"
+              ? "radial-gradient(60% 50% at 50% 30%, oklch(0.72 0.18 290 / 0.20), transparent 70%), radial-gradient(50% 40% at 70% 80%, oklch(0.72 0.14 230 / 0.16), transparent 70%)"
+              : "radial-gradient(60% 50% at 50% 30%, oklch(0.78 0.12 200 / 0.18), transparent 70%), radial-gradient(50% 40% at 30% 80%, oklch(0.82 0.10 160 / 0.14), transparent 70%)",
         }}
       />
+
+      {/* Floating ambient dots — very subtle, only while running. */}
+      {running && (
+        <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <motion.span
+              key={i}
+              className="absolute rounded-full bg-primary/20 blur-sm"
+              style={{
+                width: 6 + (i % 3) * 4,
+                height: 6 + (i % 3) * 4,
+                left: `${15 + i * 17}%`,
+                top: `${20 + ((i * 37) % 60)}%`,
+              }}
+              animate={{
+                y: [0, -18, 0],
+                opacity: [0.25, 0.7, 0.25],
+              }}
+              transition={{
+                duration: 7 + i * 1.4,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: i * 0.6,
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       <div
         className={cn(
@@ -209,6 +261,12 @@ export function FocusMode() {
                 strokeDasharray={c}
                 animate={{ strokeDashoffset: c - (pct / 100) * c }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
+                style={{
+                  filter: running
+                    ? "drop-shadow(0 0 8px oklch(0.72 0.18 290 / 0.6))"
+                    : "none",
+                  transition: "filter 0.6s ease",
+                }}
               />
               <defs>
                 <linearGradient id="focus-ring-grad" x1="0" y1="0" x2="1" y2="1">
@@ -224,9 +282,7 @@ export function FocusMode() {
 
           {/* Timer */}
           <div className="mt-8">
-            <div className="font-mono text-5xl font-semibold tracking-tight tabular-nums sm:text-6xl">
-              {mm}:{ss}
-            </div>
+            <AnimatedTimer mm={mm} ss={ss} />
             <p className="mt-2 text-xs text-muted-foreground">
               {MODE_LABEL[mode]} · {MODE_MINUTES[mode]} min
             </p>
@@ -455,6 +511,46 @@ function ThinkingRow() {
           />
         ))}
       </div>
+    </div>
+  );
+}
+
+/**
+ * AnimatedTimer — each digit slides up when it changes, giving the
+ * countdown a subtle "flipping clock" feel without introducing a heavy
+ * odometer dependency. Digits that don't change stay perfectly still,
+ * so the effect only draws attention at natural transition points.
+ */
+function AnimatedTimer({ mm, ss }: { mm: string; ss: string }) {
+  const chars = `${mm}:${ss}`.split("");
+  return (
+    <div className="flex justify-center font-mono text-5xl font-semibold tracking-tight tabular-nums sm:text-6xl">
+      {chars.map((ch, i) =>
+        ch === ":" ? (
+          <span key={`sep-${i}`} className="px-0.5 opacity-60">
+            :
+          </span>
+        ) : (
+          <span
+            key={`slot-${i}`}
+            className="relative inline-block overflow-hidden"
+            style={{ width: "0.62em", height: "1em" }}
+          >
+            <AnimatePresence initial={false} mode="popLayout">
+              <motion.span
+                key={`${i}-${ch}`}
+                initial={{ y: "-100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: "100%", opacity: 0 }}
+                transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+                className="absolute inset-0 flex items-center justify-center"
+              >
+                {ch}
+              </motion.span>
+            </AnimatePresence>
+          </span>
+        ),
+      )}
     </div>
   );
 }
