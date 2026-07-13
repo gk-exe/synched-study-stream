@@ -514,3 +514,43 @@ function ThinkingRow() {
     </div>
   );
 }
+
+/**
+ * AnimatedTimer — each digit slides up when it changes, giving the
+ * countdown a subtle "flipping clock" feel without introducing a heavy
+ * odometer dependency. Digits that don't change stay perfectly still,
+ * so the effect only draws attention at natural transition points.
+ */
+function AnimatedTimer({ mm, ss }: { mm: string; ss: string }) {
+  const chars = `${mm}:${ss}`.split("");
+  return (
+    <div className="flex justify-center font-mono text-5xl font-semibold tracking-tight tabular-nums sm:text-6xl">
+      {chars.map((ch, i) =>
+        ch === ":" ? (
+          <span key={`sep-${i}`} className="px-0.5 opacity-60">
+            :
+          </span>
+        ) : (
+          <span
+            key={`slot-${i}`}
+            className="relative inline-block overflow-hidden"
+            style={{ width: "0.62em", height: "1em" }}
+          >
+            <AnimatePresence initial={false} mode="popLayout">
+              <motion.span
+                key={`${i}-${ch}`}
+                initial={{ y: "-100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: "100%", opacity: 0 }}
+                transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+                className="absolute inset-0 flex items-center justify-center"
+              >
+                {ch}
+              </motion.span>
+            </AnimatePresence>
+          </span>
+        ),
+      )}
+    </div>
+  );
+}
