@@ -55,6 +55,8 @@ type Stats = {
   momentumScore: number; // 0..100
   companionTheme: string;
   unlockedThemes: string[];
+  /** Generic coin-unlocked premium features, e.g. "companion-creator". */
+  unlockedFeatures: string[];
   currentTask: string | null;
   longBreaksToday: number;
   lastBreakDate: string | null;
@@ -70,6 +72,7 @@ const defaultStats: Stats = {
   momentumScore: 50,
   companionTheme: "aurora",
   unlockedThemes: ["aurora"],
+  unlockedFeatures: [],
   currentTask: null,
   longBreaksToday: 0,
   lastBreakDate: null,
@@ -90,6 +93,8 @@ type Ctx = {
   setCurrentTask: (task: string | null) => void;
   setCompanionTheme: (id: string) => void;
   unlockTheme: (id: string, cost: number) => boolean;
+  /** Unlock a coin-gated feature. Returns false when coins are short. */
+  unlockFeature: (id: string, cost: number) => boolean;
 };
 
 const PomodoroCtx = createContext<Ctx | null>(null);
@@ -165,6 +170,8 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
             momentumScore: (row as any).momentum_score ?? 50,
             companionTheme: (row as any).companion_theme ?? "aurora",
             unlockedThemes: ((row as any).unlocked_themes as string[] | null) ?? ["aurora"],
+            unlockedFeatures:
+              ((row as any).unlocked_features as string[] | null) ?? [],
             currentTask: (row as any).current_task ?? null,
             longBreaksToday:
               (row as any).last_break_date === today ? ((row as any).long_breaks_today ?? 0) : 0,
@@ -198,6 +205,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
         momentum_score: stats.momentumScore,
         companion_theme: stats.companionTheme,
         unlocked_themes: stats.unlockedThemes,
+        unlocked_features: stats.unlockedFeatures,
         current_task: stats.currentTask,
         long_breaks_today: stats.longBreaksToday,
         last_break_date: stats.lastBreakDate,
@@ -399,13 +407,31 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     return ok;
   }, []);
 
+  const unlockFeature = useCallback((id: string, cost: number) => {
+    let ok = false;
+    setStats((prev) => {
+      if (prev.unlockedFeatures.includes(id)) {
+        ok = true;
+        return prev;
+      }
+      if (prev.coins < cost) return prev;
+      ok = true;
+      return {
+        ...prev,
+        coins: prev.coins - cost,
+        unlockedFeatures: [...prev.unlockedFeatures, id],
+      };
+    });
+    return ok;
+  }, []);
+
   const value = useMemo<Ctx>(
     () => ({
       mode, setMode, remaining, total, running,
       start, pause, reset, skip, stats, loading,
-      setCurrentTask, setCompanionTheme, unlockTheme,
+      setCurrentTask, setCompanionTheme, unlockTheme, unlockFeature,
     }),
-    [mode, setMode, remaining, total, running, start, pause, reset, skip, stats, loading, setCurrentTask, setCompanionTheme, unlockTheme],
+    [mode, setMode, remaining, total, running, start, pause, reset, skip, stats, loading, setCurrentTask, setCompanionTheme, unlockTheme, unlockFeature],
   );
 
   return <PomodoroCtx.Provider value={value}>{children}</PomodoroCtx.Provider>;
