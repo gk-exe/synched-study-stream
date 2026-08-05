@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { getTheme } from "@/lib/companion-themes";
+import { useCustomCompanion } from "@/hooks/use-custom-companion";
 
 export type OrbState = "idle" | "listening" | "speaking" | "resting" | "celebrate";
 
@@ -28,6 +29,8 @@ export function CompanionOrb({
   themeId,
   className,
   expression = "soft",
+  imageUrl,
+  useCustom = true,
 }: {
   state?: OrbState;
   size?: number;
@@ -35,10 +38,16 @@ export function CompanionOrb({
   className?: string;
   /** Subtle face expression hint — currently controls the mouth arc. */
   expression?: "soft" | "smile" | "neutral";
+  /** Explicit custom render (used by the creator preview). */
+  imageUrl?: string | null;
+  /** Set false to always draw the default Sync robot (e.g. style pickers). */
+  useCustom?: boolean;
 }) {
   const [blink, setBlink] = useState(false);
   const [tilt, setTilt] = useState(0);
   const theme = getTheme(themeId);
+  const { imageUrl: adoptedUrl } = useCustomCompanion();
+  const custom = imageUrl ?? (useCustom ? adoptedUrl : null);
 
   // Natural-feeling blink loop
   useEffect(() => {
@@ -158,6 +167,14 @@ export function CompanionOrb({
         animate={{ scale: breathScale }}
         transition={{ duration: breathDuration, repeat: Infinity, ease: "easeInOut" }}
       >
+        {/* Custom render — the user's own companion becomes the face. */}
+        {custom && (
+          <img
+            src={custom}
+            alt="Your companion"
+            className="absolute inset-0 h-full w-full rounded-full object-cover"
+          />
+        )}
         {/* Ear-bumps — subtle robot side pieces (headphone-like). */}
         <span
           className="absolute top-1/2 -translate-y-1/2 rounded-full border border-foreground/10"
@@ -192,6 +209,7 @@ export function CompanionOrb({
         )}
 
         {/* Face */}
+        {!custom && (
         <div className="relative flex flex-col items-center" style={{ width: "50%" }}>
           <div className="flex w-full items-center justify-between">
             <Eye blink={blink} happy={showSmile} accent={theme.accent} />
@@ -212,10 +230,14 @@ export function CompanionOrb({
             )}
           </AnimatePresence>
         </div>
+        )}
 
         {/* Soft specular highlight */}
         <div
-          className="absolute top-[12%] left-[18%] rounded-full bg-white/40 blur-md"
+          className={cn(
+            "absolute top-[12%] left-[18%] rounded-full bg-white/40 blur-md",
+            custom && "opacity-40",
+          )}
           style={{ width: "22%", height: "14%" }}
         />
       </motion.div>

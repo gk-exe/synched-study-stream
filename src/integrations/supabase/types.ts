@@ -164,43 +164,61 @@ export type Database = {
       }
       companion_concepts: {
         Row: {
+          adopted_at: string | null
           adopted_companion_id: string | null
           created_at: string
           error: string | null
           generated_asset_path: string | null
           id: string
           inspiration_paths: string[]
+          name: string | null
           palette: Json
+          preview_url: string | null
           prompt: string | null
+          reference_path: string | null
           status: string
+          style: string
           updated_at: string
           user_id: string
+          variations: Json
         }
         Insert: {
+          adopted_at?: string | null
           adopted_companion_id?: string | null
           created_at?: string
           error?: string | null
           generated_asset_path?: string | null
           id?: string
           inspiration_paths?: string[]
+          name?: string | null
           palette?: Json
+          preview_url?: string | null
           prompt?: string | null
+          reference_path?: string | null
           status?: string
+          style?: string
           updated_at?: string
           user_id: string
+          variations?: Json
         }
         Update: {
+          adopted_at?: string | null
           adopted_companion_id?: string | null
           created_at?: string
           error?: string | null
           generated_asset_path?: string | null
           id?: string
           inspiration_paths?: string[]
+          name?: string | null
           palette?: Json
+          preview_url?: string | null
           prompt?: string | null
+          reference_path?: string | null
           status?: string
+          style?: string
           updated_at?: string
           user_id?: string
+          variations?: Json
         }
         Relationships: [
           {
@@ -1399,6 +1417,7 @@ export type Database = {
           momentum_score: number
           streak: number
           total_focus_sessions: number
+          unlocked_features: string[]
           unlocked_themes: string[]
           updated_at: string
           user_id: string
@@ -1416,6 +1435,7 @@ export type Database = {
           momentum_score?: number
           streak?: number
           total_focus_sessions?: number
+          unlocked_features?: string[]
           unlocked_themes?: string[]
           updated_at?: string
           user_id: string
@@ -1433,6 +1453,7 @@ export type Database = {
           momentum_score?: number
           streak?: number
           total_focus_sessions?: number
+          unlocked_features?: string[]
           unlocked_themes?: string[]
           updated_at?: string
           user_id?: string
