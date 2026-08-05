@@ -209,6 +209,7 @@ export function CompanionOrb({
         )}
 
         {/* Face */}
+        {!custom && (
         <div className="relative flex flex-col items-center" style={{ width: "50%" }}>
           <div className="flex w-full items-center justify-between">
             <Eye blink={blink} happy={showSmile} accent={theme.accent} />
@@ -229,10 +230,14 @@ export function CompanionOrb({
             )}
           </AnimatePresence>
         </div>
+        )}
 
         {/* Soft specular highlight */}
         <div
-          className="absolute top-[12%] left-[18%] rounded-full bg-white/40 blur-md"
+          className={cn(
+            "absolute top-[12%] left-[18%] rounded-full bg-white/40 blur-md",
+            custom && "opacity-40",
+          )}
           style={{ width: "22%", height: "14%" }}
         />
       </motion.div>
