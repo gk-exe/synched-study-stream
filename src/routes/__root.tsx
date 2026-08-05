@@ -15,6 +15,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { PomodoroProvider } from "@/hooks/use-pomodoro";
 import { AppDataProvider } from "@/hooks/use-app-data";
 import { CompanionProvider } from "@/hooks/use-companion";
+import { CustomCompanionProvider } from "@/hooks/use-custom-companion";
 import { CompanionMilestones } from "@/components/companion/CompanionMilestones";
 
 function NotFoundComponent() {
@@ -129,9 +130,11 @@ function RootComponent() {
           <AppDataProvider>
             <PomodoroProvider>
               <CompanionProvider>
-                <Outlet />
-                <CompanionMilestones />
-                <Toaster />
+                <CustomCompanionProvider>
+                  <Outlet />
+                  <CompanionMilestones />
+                  <Toaster />
+                </CustomCompanionProvider>
               </CompanionProvider>
             </PomodoroProvider>
           </AppDataProvider>
