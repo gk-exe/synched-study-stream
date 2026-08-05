@@ -26,6 +26,7 @@ import { Route as LibraryNotesRouteImport } from './routes/library.notes'
 import { Route as LibraryFlashcardsRouteImport } from './routes/library.flashcards'
 import { Route as LibraryExplanationsRouteImport } from './routes/library.explanations'
 import { Route as LibraryCollectionsRouteImport } from './routes/library.collections'
+import { Route as ApiCompanionImageRouteImport } from './routes/api/companion-image'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
 const SignupRoute = SignupRouteImport.update({
@@ -113,6 +114,11 @@ const LibraryCollectionsRoute = LibraryCollectionsRouteImport.update({
   path: '/collections',
   getParentRoute: () => LibraryRoute,
 } as any)
+const ApiCompanionImageRoute = ApiCompanionImageRouteImport.update({
+  id: '/api/companion-image',
+  path: '/api/companion-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -132,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/companion-image': typeof ApiCompanionImageRoute
   '/library/collections': typeof LibraryCollectionsRoute
   '/library/explanations': typeof LibraryExplanationsRoute
   '/library/flashcards': typeof LibraryFlashcardsRoute
@@ -152,6 +159,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/companion-image': typeof ApiCompanionImageRoute
   '/library/collections': typeof LibraryCollectionsRoute
   '/library/explanations': typeof LibraryExplanationsRoute
   '/library/flashcards': typeof LibraryFlashcardsRoute
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/companion-image': typeof ApiCompanionImageRoute
   '/library/collections': typeof LibraryCollectionsRoute
   '/library/explanations': typeof LibraryExplanationsRoute
   '/library/flashcards': typeof LibraryFlashcardsRoute
@@ -195,6 +204,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/api/chat'
+    | '/api/companion-image'
     | '/library/collections'
     | '/library/explanations'
     | '/library/flashcards'
@@ -215,6 +225,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/api/chat'
+    | '/api/companion-image'
     | '/library/collections'
     | '/library/explanations'
     | '/library/flashcards'
@@ -235,6 +246,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/api/chat'
+    | '/api/companion-image'
     | '/library/collections'
     | '/library/explanations'
     | '/library/flashcards'
@@ -256,6 +268,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   SignupRoute: typeof SignupRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiCompanionImageRoute: typeof ApiCompanionImageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -379,6 +392,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LibraryCollectionsRouteImport
       parentRoute: typeof LibraryRoute
     }
+    '/api/companion-image': {
+      id: '/api/companion-image'
+      path: '/api/companion-image'
+      fullPath: '/api/companion-image'
+      preLoaderRoute: typeof ApiCompanionImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -423,17 +443,8 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   SignupRoute: SignupRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiCompanionImageRoute: ApiCompanionImageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
