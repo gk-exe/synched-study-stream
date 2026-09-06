@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { localDb as supabase } from "@/lib/local-db";
 // NOTE: Learning Hub tables exist in the database; types regenerate later.
 // Until then we cast through `any` at the query boundary.
 
