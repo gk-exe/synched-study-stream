@@ -1,36 +1,37 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+/**
+ * Local, sign-in-free "user".
+ * ---------------------------------------------------------------------
+ * StudySync AI no longer has accounts. Every feature still wants a stable
+ * id to hang progress off, so we hand out a single anonymous local user.
+ * Nothing here talks to an auth service — no sessions, no listeners, no
+ * redirects.
+ */
+import { createContext, useContext, useMemo } from "react";
+import { LOCAL_USER_ID } from "@/lib/local-db";
+
+export type LocalUser = {
+  id: string;
+  email: null;
+  user_metadata: { full_name: string };
+};
 
 type AuthCtx = {
-  user: User | null;
-  session: Session | null;
+  user: LocalUser;
+  session: null;
   loading: boolean;
 };
 
-const Ctx = createContext<AuthCtx>({ user: null, session: null, loading: true });
+const localUser: LocalUser = {
+  id: LOCAL_USER_ID,
+  email: null,
+  user_metadata: { full_name: "Explorer" },
+};
+
+const Ctx = createContext<AuthCtx>({ user: localUser, session: null, loading: false });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
-      setSession(s);
-      setLoading(false);
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
-
-  return (
-    <Ctx.Provider value={{ user: session?.user ?? null, session, loading }}>
-      {children}
-    </Ctx.Provider>
-  );
+  const value = useMemo<AuthCtx>(() => ({ user: localUser, session: null, loading: false }), []);
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
 export const useAuth = () => useContext(Ctx);
