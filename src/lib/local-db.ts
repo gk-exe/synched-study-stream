@@ -224,7 +224,7 @@ class Query implements PromiseLike<Result<any>> {
   private mode: "select" | "insert" | "update" | "upsert" | "delete" = "select";
   private payload: Row | Row[] = {};
   private wantsRows = false;
-  private single: "one" | "maybe" | null = null;
+  private singleMode: "one" | "maybe" | null = null;
 
   constructor(private table: string) {}
 
@@ -289,8 +289,12 @@ class Query implements PromiseLike<Result<any>> {
     this.limitN = n;
     return this;
   }
+  single() {
+    this.singleMode = "one";
+    return this;
+  }
   maybeSingle() {
-    this.single = "maybe";
+    this.singleMode = "maybe";
     return this;
   }
 
@@ -358,7 +362,7 @@ class Query implements PromiseLike<Result<any>> {
       if (this.limitN != null) affected = affected.slice(0, this.limitN);
     }
 
-    if (this.single === "one") {
+    if (this.singleMode === "one") {
       if (affected.length !== 1) {
         return affected.length === 0
           ? { data: null, error: { message: "No rows found" } }
@@ -366,7 +370,7 @@ class Query implements PromiseLike<Result<any>> {
       }
       return { data: this.clone(affected[0]), error: null };
     }
-    if (this.single === "maybe") {
+    if (this.singleMode === "maybe") {
       return { data: affected.length ? this.clone(affected[0]) : null, error: null };
     }
     if (!this.wantsRows && this.mode !== "select") return { data: null, error: null };
@@ -390,14 +394,6 @@ class Query implements PromiseLike<Result<any>> {
     return Promise.resolve(result).then(onfulfilled, onrejected);
   }
 }
-
-// `single()` needs the property defined after the class body so TS keeps the
-// fluent return type identical to the other helpers.
-(Query.prototype as any).single = function single(this: any) {
-  this.single_ = true;
-  (this as any)["single"] = undefined;
-  return this;
-};
 
 /* ------------------------------------------------------------------ */
 /* Local file storage (replaces buckets)                               */
