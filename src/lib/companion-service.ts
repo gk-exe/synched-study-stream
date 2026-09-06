@@ -40,7 +40,7 @@
  *     server function (not implemented here).
  */
 
-import { supabase } from "@/integrations/supabase/client";
+import { localDb as supabase } from "@/lib/local-db";
 import type { Json } from "@/integrations/supabase/types";
 
 // ---------------------------------------------------------------------

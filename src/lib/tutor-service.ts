@@ -23,7 +23,7 @@
  * writes it explicitly. The browser supabase client is used so RLS is
  * enforced as the signed-in user.
  */
-import { supabase } from "@/integrations/supabase/client";
+import { localDb as supabase } from "@/lib/local-db";
 
 // Types are not yet in the generated `Database` typings, so we cast at
 // the query boundary with `any`. Public types below stay strict.

@@ -11,7 +11,7 @@
  * Image generation itself streams through `/api/companion-image`; this
  * module only persists the result so every screen can read it back.
  */
-import { supabase } from "@/integrations/supabase/client";
+import { localDb as supabase } from "@/lib/local-db";
 
 /** Coin price to unlock the creator. Mirrors the copy in the UI. */
 export const CREATOR_UNLOCK_COST = 500;

@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { localDb as supabase } from "@/lib/local-db";
 import type { Database } from "@/integrations/supabase/types";
 
 export type DbGoal = Database["public"]["Tables"]["daily_goals"]["Row"];

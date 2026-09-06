@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { localDb as supabase } from "@/lib/local-db";
 
 const KEY = "studysync:onboarded:v1";
 
